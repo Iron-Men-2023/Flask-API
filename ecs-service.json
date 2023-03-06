@@ -1,0 +1,14 @@
+{
+  "cluster": "flask-api-cluster1",
+  "serviceName": "flask-api:5",
+  "taskDefinition": "flask-api:5 api",
+  "loadBalancers": [
+    {
+      "targetGroupArn": "My-API",
+      "containerName": "web",
+      "containerPort": 4567
+    }
+  ],
+  "desiredCount": 1,
+  "role": "ecsServiceRole"
+}

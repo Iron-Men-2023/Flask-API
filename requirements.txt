@@ -1,0 +1,7 @@
+flask
+firebase_admin
+datetime
+opencv-contrib-python
+numpy
+face_recognition
+gunicorn
