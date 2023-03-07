@@ -35,7 +35,7 @@ class FacialRecognitionAPI:
 
 api = FacialRecognitionAPI("https://flask-api-omnilense.herokuapp.com")
 # Example of a user ID
-user_id = "iVqaEic7VbTA9x5FSokDg92HIQA2"
+user_id = "LfqBYBcq1BhHUvmE7803PhCFxeI2"
 path = "images/ml_images/{}.jpg".format(user_id)
 result = api.recognize_face(path)
 print(result)
