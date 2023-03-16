@@ -1,0 +1,36 @@
+name: Update Face Database
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+
+jobs:
+  update_database:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.8"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Download images from Firebase
+      run: python download_images_from_firebase.py
+
+    - name: Update face database
+      run: python update_database.py
+
+    - name: Commit changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add face_database.npy
+        git commit -m "Update face database" || echo "No changes to commit"
+        git push
