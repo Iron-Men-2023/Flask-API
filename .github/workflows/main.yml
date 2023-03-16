@@ -23,13 +23,10 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -r downloadRequirements.txt
 
     - name: Download images from Firebase
       run: python download_images_from_firebase.py
-
-    - name: Update face database
-      run: python update_database.py
 
     - name: Commit changes
       run: |
