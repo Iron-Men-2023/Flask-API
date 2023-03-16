@@ -2,7 +2,11 @@ name: Update Face Database
 
 on:
   schedule:
-    - cron: "48 23 * * *"
+    - cron: "53 23 * * *"
+  push:
+    # Sequence of patterns matched against refs/heads
+    branches:    
+      - main
 
 jobs:
   update_database:
