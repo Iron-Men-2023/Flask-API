@@ -12,6 +12,14 @@ class RecognitionHelper:
         # Resize frame for a faster speed
         self.resizedFrame = 0.25
 
+    def enhance_image(self, img):
+        ycrcb = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
+        channels = cv2.split(ycrcb)
+        cv2.equalizeHist(channels[0], channels[0])
+        cv2.merge(channels, ycrcb)
+        enhanced_img = cv2.cvtColor(ycrcb, cv2.COLOR_YCrCb2BGR)
+        return enhanced_img
+
     def load_images(self, images_path):
         # Loading images from folder
         images_path = glob.glob(os.path.join(images_path, "*.*"))
@@ -30,6 +38,12 @@ class RecognitionHelper:
 
             # Get encoding
             img_encoding_list = face_recognition.face_encodings(rgb_img)
+            if len(img_encoding_list) == 0:
+                print(f"No face found in {img_path}. Enhancing image.")
+                enhanced_img = self.enhance_image(img_resize)
+                rgb_enhanced_img = cv2.cvtColor(enhanced_img, cv2.COLOR_BGR2RGB)
+                img_encoding_list = face_recognition.face_encodings(rgb_enhanced_img)
+
             if len(img_encoding_list) > 0:
                 img_encoding = img_encoding_list[0]
 
@@ -37,7 +51,7 @@ class RecognitionHelper:
                 self.encodings.append(img_encoding)
                 self.names.append(filename)
             else:
-                print(f"No face found in {img_path}")
+                print(f"No face found in {img_path} even after enhancement.")
 
         print("Encoding images loaded")
 
@@ -48,7 +62,6 @@ class RecognitionHelper:
             return None, None
         print("Frame size: {}".format(frame.shape))
         small_frame = cv2.resize(frame, (0, 0), fx=self.resizedFrame, fy=self.resizedFrame)
-        # Find all the faces and face encodings in the current frame of video
         # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
         rgb_small_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
         face_locations = face_recognition.face_locations(rgb_small_frame)
@@ -64,15 +77,41 @@ class RecognitionHelper:
                 # Or instead, use the known face with the smallest distance to the new face
                 face_distances = face_recognition.face_distance(self.encodings, face_encoding)
                 best_match_index = np.argmin(face_distances)
+
                 if matches[best_match_index]:
                     name = self.names[best_match_index]
                 face_names.append(name)
                 print("Face found: {}".format(name))
 
-            # Convert to numpy array to adjust coordinates with frame resizing quickly
+                # Convert to numpy array to adjust coordinates with frame resizing quickly
             face_locations = np.array(face_locations)
             face_locations = face_locations / self.resizedFrame
             return face_locations.astype(int), face_names
         else:
-            print("No face found")
-            return None, None
+            print("No face found. Enhancing image.")
+            enhanced_small_frame = self.enhance_image(small_frame)
+            rgb_enhanced_small_frame = cv2.cvtColor(enhanced_small_frame, cv2.COLOR_BGR2RGB)
+            enhanced_face_locations = face_recognition.face_locations(rgb_enhanced_small_frame)
+            enhanced_face_encodings = face_recognition.face_encodings(rgb_enhanced_small_frame, enhanced_face_locations)
+
+            if len(enhanced_face_encodings) > 0:
+                for face_encoding in enhanced_face_encodings:
+                    # See if the face is a match for the known face(s)
+                    matches = face_recognition.compare_faces(self.encodings, face_encoding)
+                    name = "Unknown"
+
+                    # Or instead, use the known face with the smallest distance to the new face
+                    face_distances = face_recognition.face_distance(self.encodings, face_encoding)
+                    best_match_index = np.argmin(face_distances)
+                    if matches[best_match_index]:
+                        name = self.names[best_match_index]
+                    face_names.append(name)
+                    print("Face found: {}".format(name))
+
+                # Convert to numpy array to adjust coordinates with frame resizing quickly
+                enhanced_face_locations = np.array(enhanced_face_locations)
+                enhanced_face_locations = enhanced_face_locations / self.resizedFrame
+                return enhanced_face_locations.astype(int), face_names
+            else:
+                print("No face found even after enhancement.")
+                return None, None

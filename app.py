@@ -12,10 +12,9 @@ recognizer.get_all_images()
 @app.route('/api/facial-recognition', methods=['POST'])
 def facial_recognition():
     # Get image data from request
-    recognizer.get_all_images()
     print(request.form)
     path = request.form['path']
-    face_names, faceLoc = recognizer.recognize_faces(path)
+    face_names, faceLoc = recognizer.process_image(path)
 
     if face_names is None or faceLoc is None:
         return jsonify({'message': 'No face found'})
@@ -51,4 +50,4 @@ def index():
 
 if __name__ == '__main__':
     # Threaded option to enable multiple instances for multiple user access support
-    app.run(port=8000)
+    app.run(port=8000, debug=True, threaded=True, host='0.0.0.0')
