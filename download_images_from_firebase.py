@@ -6,7 +6,7 @@ from google.cloud import storage
 from firebase_admin import credentials, initialize_app, firestore
 
 # Replace with the path to your Firebase JSON key
-FIREBASE_JSON_KEY = '../omnilens-d5745-firebase-adminsdk-rorof-df461ea39d.json'
+FIREBASE_JSON_KEY = 'omnilens-d5745-firebase-adminsdk-rorof-df461ea39d.json'
 
 # Replace with your Firebase bucket name
 FIREBASE_BUCKET_NAME = 'omnilens-d5745.appspot.com'
