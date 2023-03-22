@@ -5,21 +5,40 @@ from downloadImgAndRec import FirebaseImageRecognizer
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
 recognizer = FirebaseImageRecognizer("omnilens-d5745-firebase-adminsdk-rorof-df461ea39d.json",
                                      "omnilens-d5745.appspot.com")
 
 
-@app.route('/api/facial-recognition', methods=['POST'])
+@app.route('/api/facial_recognition', methods=['POST'])
 def facial_recognition():
     # Get image data from request
     print(request.form)
-    path = request.form['path']
+    print(request.json)
+    path = None
     user_id = None
+    is_json = False
     try:
-        user_id = request.form['user_id']
+        path = request.json['path']
+        is_json = True
     except:
-        pass
+        try:
+            path = request.form['path']
+            is_json = False
+        except:
+            pass
+    if not is_json:
+        path = request.form['path']
+        try:
+            user_id = request.form['user_id']
+        except:
+            pass
+    else:
+        path = request.json['path']
+        try:
+            user_id = request.json['user_id']
+        except:
+            pass
     if user_id is None:
         face_names, recents = recognizer.process_image(path, None)
     else:
@@ -50,7 +69,17 @@ def facial_recognition():
             return jsonify({'message': 'Error'})
 
 
-@app.route('/api/facial-recognition', methods=['GET'])
+@app.route('/api/facial_recognition', methods=['OPTIONS'])
+def handle_options():
+    response = app.make_default_options_response()
+
+    # Set the Access-Control-Allow-Headers header
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+
+    return response
+
+
+@app.route('/api/facial_recognition', methods=['GET'])
 def get():
     return jsonify({'message': 'Hello World!'})
 
