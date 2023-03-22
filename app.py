@@ -13,8 +13,15 @@ def facial_recognition():
     # Get image data from request
     print(request.form)
     path = request.form['path']
-    user_id = request.form['user_id']
-    face_names, recents = recognizer.process_image(path, user_id)
+    user_id = None
+    try:
+        user_id = request.form['user_id']
+    except:
+        pass
+    if user_id is None:
+        face_names, recents = recognizer.process_image(path, None)
+    else:
+        face_names, recents = recognizer.process_image(path, user_id)
 
     if face_names is None:
         return jsonify({'message': 'No face found'})
@@ -27,7 +34,7 @@ def facial_recognition():
             # data_json = json.dumps(faceLoc[0].tolist())
             # Convert the list to a JSON string
             if recents is None:
-                recents_json = "Error getting recents"
+                recents_json = "Error getting recents or not entered"
             else:
                 recents_json = json.dumps(recents)
 

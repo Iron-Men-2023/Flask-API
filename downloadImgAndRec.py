@@ -70,7 +70,10 @@ class FirebaseImageRecognizer:
         while elapsed_time < 5:
             face_names, face_locations = self.try_recognition(image, methods)
             if face_names != "No face found":
-                recents = self.add_to_recents(user_id, face_names, face_locations)
+                if user_id is not None:
+                    recents = self.add_to_recents(user_id, face_names, face_locations)
+                else:
+                    recents = None
                 return face_names, recents
 
             elapsed_time = time.time() - start_time
