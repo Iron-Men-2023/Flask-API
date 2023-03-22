@@ -6,7 +6,7 @@ class FacialRecognitionAPI:
 
     def recognize_face(self, path):
         url = f"{self.base_url}/api/facial-recognition"
-        data = {"path": path}
+        data = {"path": path, "user_id": "LfqBYBcq1BhHUvmE7803PhCFxeI2"}
 
         try:
             response = requests.post(url, data=data)
@@ -33,7 +33,7 @@ class FacialRecognitionAPI:
             return None
 
 
-api = FacialRecognitionAPI("https://flask-api-omnilense.herokuapp.com")
+api = FacialRecognitionAPI("http://192.168.0.119:8000")
 # Example of a user ID
 user_id = "LfqBYBcq1BhHUvmE7803PhCFxeI2"
 path = "images/ml_images/{}.jpg".format(user_id)
