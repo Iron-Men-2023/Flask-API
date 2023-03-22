@@ -14,10 +14,11 @@ class FacialRecognitionAPI:
 
             if response.status_code == 200:
                 data = response.json()
+                print(data)
                 if data.get("message") == "No face found" or not data.get("predicted_person") or data.get(
                         "message") == "Error":
                     print(data.get("message"))
-                    return None
+                    return "Unknown"
 
                 predicted_person = data.get("predicted_person")[0]
                 if predicted_person == "Unknown":

@@ -94,5 +94,3 @@ class FirebaseImageRecognizer:
                 # return the new recent list
                 return recent_ref.get().get("recents")
         return None
-
-

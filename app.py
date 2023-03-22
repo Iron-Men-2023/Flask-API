@@ -2,8 +2,10 @@ import json
 
 from flask import Flask, request, jsonify, render_template
 from downloadImgAndRec import FirebaseImageRecognizer
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 recognizer = FirebaseImageRecognizer("omnilens-d5745-firebase-adminsdk-rorof-df461ea39d.json",
                                      "omnilens-d5745.appspot.com")
 
