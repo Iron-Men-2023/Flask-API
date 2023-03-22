@@ -1,12 +1,11 @@
 import json
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from downloadImgAndRec import FirebaseImageRecognizer
 
 app = Flask(__name__)
 recognizer = FirebaseImageRecognizer("omnilens-d5745-firebase-adminsdk-rorof-df461ea39d.json",
                                      "omnilens-d5745.appspot.com")
-recognizer.get_all_images()
 
 
 @app.route('/api/facial-recognition', methods=['POST'])
@@ -14,21 +13,27 @@ def facial_recognition():
     # Get image data from request
     print(request.form)
     path = request.form['path']
-    face_names, faceLoc = recognizer.process_image(path)
+    user_id = request.form['user_id']
+    face_names, recents = recognizer.process_image(path, user_id)
 
-    if face_names is None or faceLoc is None:
+    if face_names is None:
         return jsonify({'message': 'No face found'})
     else:
         try:
-            faceLoc_dict = {}
-            for i in range(len(faceLoc)):
-                faceLoc_dict[i] = faceLoc[i]
-            # Convert the NumPy arrays to nested lists using tolist()
-            data_json = json.dumps(faceLoc[0].tolist())
+            # faceLoc_dict = {}
+            # for i in range(len(faceLoc)):
+            #     faceLoc_dict[i] = faceLoc[i]
+            # # Convert the NumPy arrays to nested lists using tolist()
+            # data_json = json.dumps(faceLoc[0].tolist())
+            # Convert the list to a JSON string
+            if recents is None:
+                recents_json = "Error getting recents"
+            else:
+                recents_json = json.dumps(recents)
 
             # Print the JSON string
             print(face_names)
-            jsonConv = jsonify({'predicted_person': face_names, 'face_loc': data_json, 'message': 'Face found'})
+            jsonConv = jsonify({'predicted_person': face_names, 'recents': recents_json, 'message': 'Face found'})
             print("Json: ", jsonConv)
             return jsonConv
         except Exception as e:
@@ -43,9 +48,20 @@ def get():
 
 # A new default route
 @app.route('/')
-def index():
-    # A welcome message to test our server
-    return "<h1>Welcome to our medium-greeting-api!</h1>"
+def intro():
+    return render_template('intro.html')
+
+
+@app.route('/documentation')
+def documentation():
+    # Replace with the code to render your documentation page
+    return render_template('doc.html')
+
+
+@app.route('/help')
+def help():
+    # Replace with the code to render your help page
+    return render_template('help.html')
 
 
 if __name__ == '__main__':

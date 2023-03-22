@@ -40,8 +40,10 @@ class FirebaseImageRecognizer:
 
     def try_recognition(self, image, methods):
         for method in methods:
-            upscaled_image = upscale_image(image, method)
-            face_locations, face_names = self.sfr.detect_known_faces(upscaled_image)
+            face_locations, face_names = self.sfr.detect_known_faces(image)
+            if not face_names:
+                upscaled_image = upscale_image(image, method)
+                face_locations, face_names = self.sfr.detect_known_faces(upscaled_image)
             if face_names:
                 print(f"Found face using {method} interpolation")
                 print(face_names)
@@ -50,7 +52,7 @@ class FirebaseImageRecognizer:
         print("No face found")
         return "No face found", None
 
-    def process_image(self, image_path):
+    def process_image(self, image_path, user_id):
         blob = self.bucket.blob(image_path)
         expiration = int(datetime.now().timestamp() + 600)
         print(blob.generate_signed_url(expiration))
@@ -68,8 +70,26 @@ class FirebaseImageRecognizer:
         while elapsed_time < 5:
             face_names, face_locations = self.try_recognition(image, methods)
             if face_names != "No face found":
-                return face_names, face_locations
+                recents = self.add_to_recents(user_id, face_names, face_locations)
+                return face_names, recents
 
             elapsed_time = time.time() - start_time
 
         return "No face found", None
+
+    def add_to_recents(self, user_id, face_names):
+        # Go through the db and find the user with the name in face_names
+        users_ref = self.db.collection('users')
+        users = users_ref.stream()
+        for user in users:
+            if user.get("name") in face_names:
+                # Add the user to the recent list at the end of the list
+                recent_ref = self.db.collection('users').document(user_id)
+                recent_ref.update({
+                    u'recents': firestore.ArrayUnion([user.id])
+                })
+                # return the new recent list
+                return recent_ref.get().get("recents")
+        return None
+
+
