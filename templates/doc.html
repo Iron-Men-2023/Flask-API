@@ -1,20 +1,15 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block title %} Documentation Page {% endblock %} {%
+block content %}
+<div class="container">
+  <h1 class="my-4">API Documentation</h1>
 
-{% block title %}
-Documentation Page
-{% endblock %}
+  <h2 class="my-3">Endpoints</h2>
 
-{% block content %}
- <div class="container">
-        <h1 class="my-4">API Documentation</h1>
-
-        <h2 class="my-3">Endpoints</h2>
-
-        <section class="my-3">
-            <h3>/example_endpoint</h3>
-            <p>Description of the endpoint.</p>
-            <h4>Request</h4>
-            <pre>
+  <section class="my-3">
+    <h3>/example_endpoint</h3>
+    <p>Description of the endpoint.</p>
+    <h4>Request</h4>
+    <pre>
 POST /https://flask-api-omnilense.herokuapp.com/api/facial_recognition HTTP/1.1
 Content-Type: application/json
 
@@ -22,18 +17,20 @@ Content-Type: application/json
     "path": "path_to_firebase_storage_image",
     "user_id": "user_id of the current user
 }
-            </pre>
-            <h4>Response</h4>
-            <pre>
+            </pre
+    >
+    <h4>Response</h4>
+    <pre>
 HTTP/1.1 200 OK
 Content-Type: application/json
 
-{
+{json
     "predicted_person": "[name of the person]",
     "recents": "[list of recent peoples ids]",
 }
-            </pre>
-        </section>
-        <!-- Add more sections for other endpoints here -->
-    </div>
+            </pre
+    >
+  </section>
+  <!-- Add more sections for other endpoints here -->
+</div>
 {% endblock %}
