@@ -1,6 +1,6 @@
 import json
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from downloadImgAndRec import FirebaseImageRecognizer
 
 app = Flask(__name__)
@@ -48,9 +48,20 @@ def get():
 
 # A new default route
 @app.route('/')
-def index():
-    # A welcome message to test our server
-    return "<h1>Welcome to our medium-greeting-api!</h1>"
+def intro():
+    return render_template('intro.html')
+
+
+@app.route('/documentation')
+def documentation():
+    # Replace with the code to render your documentation page
+    return render_template('doc.html')
+
+
+@app.route('/help')
+def help():
+    # Replace with the code to render your help page
+    return render_template('help.html')
 
 
 if __name__ == '__main__':
