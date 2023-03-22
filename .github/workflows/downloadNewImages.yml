@@ -32,6 +32,8 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
+        git fetch
+        git pull
         git add .
         git commit -m "Update face database" || echo "No changes to commit"
         git push
