@@ -10,7 +10,7 @@ recognizer = FirebaseImageRecognizer("omnilens-d5745-firebase-adminsdk-rorof-df4
                                      "omnilens-d5745.appspot.com")
 
 
-@app.route('/api/facial-recognition', methods=['POST'])
+@app.route('/api/facial_recognition', methods=['POST'])
 def facial_recognition():
     # Get image data from request
     print(request.form)
@@ -79,7 +79,7 @@ def handle_options():
     return response
 
 
-@app.route('/api/facial-recognition', methods=['GET'])
+@app.route('/api/facial_recognition', methods=['GET'])
 def get():
     return jsonify({'message': 'Hello World!'})
 

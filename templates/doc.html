@@ -20,10 +20,39 @@ Content-Type: application/json
 }
     </pre>
 
-    <h4>Response</h4>
-    <div id="example-response">
+    <h4>Example Response</h4>
+    <div id="example-response1" class="json-view">
+      <pre>
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "message": "Face Found",
+    "predicted_person": "["Ben DeSollar"]",
+    "recents": ["Shows Recents"]
+}
+            </pre
+      >
+    </div>
+
+    <h4>Example Call</h4>
+    <div id="example-response" class="json-view">
       <!-- Example response will be populated by AJAX call -->
     </div>
+
+    <label for="path-input">Path:</label>
+    <input
+      type="text"
+      id="path-input"
+      value="images/ml_images/LfqBYBcq1BhHUvmE7803PhCFxeI2.jpg"
+    />
+
+    <label for="user-id-input">User ID:</label>
+    <input
+      type="text"
+      id="user-id-input"
+      value="LfqBYBcq1BhHUvmE7803PhCFxeI2"
+    />
 
     <button id="example-button" class="btn btn-primary my-3">
       Make Example Call
@@ -32,35 +61,37 @@ Content-Type: application/json
   <!-- Add more sections for other endpoints here -->
 </div>
 <!-- Add JavaScript and AJAX calls -->
-<script
-  id="jquery-full"
-  src="https://code.jquery.com/jquery-3.6.0.min.js"
-></script>
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.css"
+/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.js"></script>
+
 <script>
-  var jq = jQuery.noConflict(true);
-  jq(document).ready(function () {
-    // Make AJAX call on button click
+  (function (jq) {
     jq("#example-button").click(function () {
+      var path = jq("#path-input").val();
+      var user_id = jq("#user-id-input").val();
+
       jq.ajax({
-        url: "http://192.168.0.119:8000/api/facial-recognition",
+        url: "https://flask-api-omnilense.herokuapp.com/api/facial_recognition",
         type: "POST",
         data: JSON.stringify({
-          path: "images/ml_images/LfqBYBcq1BhHUvmE7803PhCFxeI2.jpg",
-          user_id: "LfqBYBcq1BhHUvmE7803PhCFxeI2",
+          path: path,
+          user_id: user_id,
         }),
         dataType: "json",
         contentType: "application/json",
         success: function (response) {
           // Populate example response div with JSON response
-          jq("#example-response").html(
-            "<pre>" + JSON.stringify(response, null, 2) + "</pre>"
-          );
+          jq("#example-response").JSONView(response, { collapsed: true });
         },
         error: function (xhr, status, error) {
           console.log(xhr.responseText);
         },
       });
     });
-  });
+  })(jQuery);
 </script>
 {% endblock %}
