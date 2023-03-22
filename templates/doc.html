@@ -42,7 +42,7 @@ Content-Type: application/json
     // Make AJAX call on button click
     jq("#example-button").click(function () {
       jq.ajax({
-        url: "https://flask-api-omnilense.herokuapp.com/api/facial_recognition",
+        url: "http://192.168.0.119:8000/api/facial-recognition",
         type: "POST",
         data: JSON.stringify({
           path: "images/ml_images/LfqBYBcq1BhHUvmE7803PhCFxeI2.jpg",
