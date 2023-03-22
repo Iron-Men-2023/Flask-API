@@ -1,5 +1,5 @@
-{% extends "base.html" %} {% block title %} Documentation Page {% endblock %} {%
-block content %}
+{% extends "base.html" %} {% block title %} Documentation Page {% endblock %}
+{%block content %}
 <div class="container">
   <h1 class="my-4">API Documentation</h1>
 
@@ -8,6 +8,7 @@ block content %}
   <section class="my-3">
     <h3>/example_endpoint</h3>
     <p>Description of the endpoint.</p>
+
     <h4>Request</h4>
     <pre>
 POST /https://flask-api-omnilense.herokuapp.com/api/facial_recognition HTTP/1.1
@@ -17,20 +18,49 @@ Content-Type: application/json
     "path": "path_to_firebase_storage_image",
     "user_id": "user_id of the current user
 }
-            </pre
-    >
-    <h4>Response</h4>
-    <pre>
-HTTP/1.1 200 OK
-Content-Type: application/json
+    </pre>
 
-{json
-    "predicted_person": "[name of the person]",
-    "recents": "[list of recent peoples ids]",
-}
-            </pre
-    >
+    <h4>Response</h4>
+    <div id="example-response">
+      <!-- Example response will be populated by AJAX call -->
+    </div>
+
+    <button id="example-button" class="btn btn-primary my-3">
+      Make Example Call
+    </button>
   </section>
   <!-- Add more sections for other endpoints here -->
 </div>
+<!-- Add JavaScript and AJAX calls -->
+<script
+  id="jquery-full"
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+></script>
+<script>
+  var jq = jQuery.noConflict(true);
+  jq(document).ready(function () {
+    // Make AJAX call on button click
+    jq("#example-button").click(function () {
+      jq.ajax({
+        url: "https://flask-api-omnilense.herokuapp.com/api/facial_recognition",
+        type: "POST",
+        data: JSON.stringify({
+          path: "images/ml_images/LfqBYBcq1BhHUvmE7803PhCFxeI2.jpg",
+          user_id: "LfqBYBcq1BhHUvmE7803PhCFxeI2",
+        }),
+        dataType: "json",
+        contentType: "application/json",
+        success: function (response) {
+          // Populate example response div with JSON response
+          jq("#example-response").html(
+            "<pre>" + JSON.stringify(response, null, 2) + "</pre>"
+          );
+        },
+        error: function (xhr, status, error) {
+          console.log(xhr.responseText);
+        },
+      });
+    });
+  });
+</script>
 {% endblock %}
