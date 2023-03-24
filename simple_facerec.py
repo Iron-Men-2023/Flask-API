@@ -10,7 +10,7 @@ class RecognitionHelper:
         self.names = []
         self.encodings = []
         # Resize frame for a faster speed
-        self.resizedFrame = 0.235
+        self.resizedFrame = 0.30
 
     def enhance_image(self, img):
         ycrcb = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
@@ -95,7 +95,7 @@ class RecognitionHelper:
         # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
         rgb_small_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
         face_locations = face_recognition.face_locations(rgb_small_frame, number_of_times_to_upsample=1)
-        face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations, num_jitters=40)
+        face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations, num_jitters=50)
 
         face_names = []
         if len(face_encodings) > 0:
