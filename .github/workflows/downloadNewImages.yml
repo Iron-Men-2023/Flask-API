@@ -1,8 +1,11 @@
-name: Update Face Database
+name: Update Face Database and Train Model
 
 on:
   schedule:
-    - cron: "53 23 * * *"
+    # Runs every 5 min
+    # - cron: "*/5 * * * *"
+    # Runs every 4 hours
+    - cron: "0 */4 * * *"
   push:
     # Sequence of patterns matched against refs/heads
     branches:    
@@ -26,7 +29,7 @@ jobs:
         pip install -r downloadRequirements.txt
 
     - name: Download images from Firebase
-      run: python download_images_from_firebase.py
+      run: python train_model_on_new_images.py
 
     - name: Commit changes
       run: |
