@@ -94,8 +94,8 @@ class RecognitionHelper:
         small_frame = cv2.resize(frame, (0, 0), fx=self.resizedFrame, fy=self.resizedFrame)
         # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
         rgb_small_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
-        face_locations = face_recognition.face_locations(rgb_small_frame, number_of_times_to_upsample=2)
-        face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations, num_jitters=100)
+        face_locations = face_recognition.face_locations(rgb_small_frame)
+        face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
 
         face_names = []
         if len(face_encodings) > 0:
