@@ -1,16 +1,13 @@
+import time
 from datetime import datetime
 import cv2
 from simple_facerec import RecognitionHelper
 import numpy as np
 import firebase_admin
 from firebase_admin import credentials, storage, firestore
-
 import os
-import time
-
 
 def upscale_image(image, method):
-    # Upscale the image
     result = cv2.resize(image, None, fx=4, fy=4, interpolation=getattr(cv2, method))
     return result
 
@@ -22,35 +19,21 @@ class FirebaseImageRecognizer:
         self.bucket = storage.bucket(app=self.app)
         self.db = firestore.client(app=self.app)
         self.sfr = RecognitionHelper()
-        self.sfr.load_images("images")
-
-    def get_all_images(self):
-        prefix = "images/Avatar"
-        blobs = self.bucket.list_blobs(prefix=prefix)
-        for blob in blobs:
-            # Process and save images here
-            pass
-        return blobs
+        # self.sfr.load_images("images")
 
     def save_image(self, image, save_path):
-        if not os.path.exists(save_path):
-            cv2.imwrite(save_path, image)
-        else:
-            print("File already exists")
+        cv2.imwrite(save_path, image)
 
     def try_recognition(self, image, methods):
         for method in methods:
-            face_locations, face_names = self.sfr.detect_known_faces(image)
-            if not face_names:
-                upscaled_image = upscale_image(image, method)
-                face_locations, face_names = self.sfr.detect_known_faces(upscaled_image)
-            if face_names:
+            face_data = self.sfr.detect_known_faces(image)
+            if face_data:
                 print(f"Found face using {method} interpolation")
-                print(face_names)
-                return face_names, face_locations
+                print(face_data)
+                return face_data
 
         print("No face found")
-        return "No face found", None
+        return None
 
     def process_image(self, image_path, user_id):
         blob = self.bucket.blob(image_path)
@@ -63,34 +46,60 @@ class FirebaseImageRecognizer:
 
         save_path = os.path.join("imagesTest", "test.png")
         self.save_image(image, save_path)
+        face_data = self.sfr.detect_known_faces(image)
+        if face_data:
+            print("Face found in image: ", face_data)
+            if user_id is not None:
+                recents = self.add_to_recents(user_id, [face["name"] for face in face_data])
+            else:
+                recents = None
+            return face_data, recents
+        # methods = ["INTER_NEAREST", "INTER_LINEAR", "INTER_CUBIC", "INTER_LANCZOS4"]
+        # start_time = time.time()
+        # elapsed_time = 0
+        # while elapsed_time < 6:
+        #     face_data = self.try_recognition(image, methods)
+        #     if face_data:
+        #         print("Face found in image: ", face_data)
+        #         if user_id is not None:
+        #             recents = self.add_to_recents(user_id, [face["name"] for face in face_data])
+        #         else:
+        #             recents = None
+        #         return face_data, recents
+        #
+        #     elapsed_time = time.time() - start_time
 
-        methods = ["INTER_NEAREST", "INTER_LINEAR", "INTER_CUBIC", "INTER_LANCZOS4"]
-        start_time = time.time()
-        elapsed_time = 0
-        while elapsed_time < 5:
-            face_names, face_locations = self.try_recognition(image, methods)
-            if face_names != "No face found":
-                if user_id is not None:
-                    recents = self.add_to_recents(user_id, face_names)
-                else:
-                    recents = None
-                return face_names, recents
-
-            elapsed_time = time.time() - start_time
-
-        return "No face found", None
+        return None, None
 
     def add_to_recents(self, user_id, face_names):
-        # Go through the db and find the user with the name in face_names
         users_ref = self.db.collection('users')
         users = users_ref.stream()
         for user in users:
             if user.get("name") in face_names:
-                # Add the user to the recent list at the end of the list
                 recent_ref = self.db.collection('users').document(user_id)
                 recent_ref.update({
                     u'recents': firestore.ArrayUnion([user.id])
                 })
-                # return the new recent list
                 return recent_ref.get().get("recents")
         return None
+
+    def download_image(self, image_path, save_path):
+        # Keep trying to download image until it works
+        elapsed_time = 0
+        start_time = time.time()
+        while True or elapsed_time < 10:
+            try:
+                blob = self.bucket.blob(image_path)
+                expiration = int(datetime.now().timestamp() + 600)
+                print(blob.generate_signed_url(expiration))
+
+                image_bytes = blob.download_as_bytes()
+                image_array = np.asarray(bytearray(image_bytes), dtype=np.uint8)
+                image = cv2.imdecode(image_array, -1)
+
+                self.save_image(image, save_path)
+                return image
+            except Exception as e:
+                time.sleep(1)
+                print(e)
+                elapsed_time = time.time() - start_time

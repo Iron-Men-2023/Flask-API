@@ -1,7 +1,9 @@
 import json
 
+import numpy as np
 from flask import Flask, request, jsonify, render_template
 from downloadImgAndRec import FirebaseImageRecognizer
+from simple_facerec import RecognitionHelper
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -12,38 +14,34 @@ recognizer = FirebaseImageRecognizer("omnilens-d5745-firebase-adminsdk-rorof-df4
 
 @app.route('/api/facial_recognition', methods=['POST'])
 def facial_recognition():
-    # Get image data from request
     print(request.data)
-    requestForm = request.data.decode('utf-8')  # Decode using the utf-8 encoding
-    requestForm = json.loads(requestForm)  # Convert to JSON
+    requestForm = request.data.decode('utf-8')
+    requestForm = json.loads(requestForm)
     path = requestForm['path']
     user_id = requestForm['user_id']
     print("Path: ", path)
     print("User ID: ", user_id)
-    if user_id is None:
-        face_names, recents = recognizer.process_image(path, None)
-    else:
-        face_names, recents = recognizer.process_image(path, user_id)
 
-    if face_names is None:
+    face_data, recents = recognizer.process_image(path, user_id)
+    print("Face data from class: ", face_data)
+
+    if face_data is None:
         return jsonify({'message': 'No face found'})
     else:
         try:
-            # faceLoc_dict = {}
-            # for i in range(len(faceLoc)):
-            #     faceLoc_dict[i] = faceLoc[i]
-            # # Convert the NumPy arrays to nested lists using tolist()
-            # data_json = json.dumps(faceLoc[0].tolist())
-            # Convert the list to a JSON string
+            face_names = [face["name"] for face in face_data]
+            face_loc = [face["location"] for face in face_data]
+
+            face_loc = json.dumps(face_loc, default=lambda x: int(x) if isinstance(x, np.integer) else x)
             if recents is None:
                 recents_json = "Error getting recents or not entered"
             else:
                 recents_json = json.dumps(recents)
 
-            # Print the JSON string
-            print(face_names)
-            jsonConv = jsonify({'predicted_person': face_names, 'recents': recents_json, 'message': 'Face found'})
-            print("Json: ", jsonConv)
+            response_data = {'predicted_person': face_names, 'recents': recents_json, "face_loc": face_loc,
+                             'message': 'Face found'}
+            jsonConv = jsonify(response_data)
+
             return jsonConv
         except Exception as e:
             print("Error: ", e)
@@ -53,19 +51,37 @@ def facial_recognition():
 @app.route('/api/facial_recognition', methods=['OPTIONS'])
 def handle_options():
     response = app.make_default_options_response()
-
-    # Set the Access-Control-Allow-Headers header
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-
     return response
 
 
 @app.route('/api/facial_recognition', methods=['GET'])
 def get():
-    return jsonify({'message': 'Hello World!'})
+    # Reroute to intro page
+    return render_template('intro.html')
 
 
-# A new default route
+@app.route('/api/facial_recognition/check', methods=['POST'])
+def check():
+    print(request.data)
+    requestForm = request.data.decode('utf-8')
+    requestForm = json.loads(requestForm)
+    path = requestForm['path']
+    user_id = requestForm['user_id']
+    print("Path: ", path)
+    download_to_path = "imagesTest/testProfile.{}.jpg".format(user_id)
+    load_img = recognizer.download_image(path, download_to_path)
+    # Check if there is a face in the image
+    recognizerHelper = RecognitionHelper()
+    check_face = recognizerHelper.load_single_img(download_to_path)
+    if check_face is None:
+        print("No face found")
+        return jsonify({'message': 'No face found'})
+    else:
+        print("Face found")
+        return jsonify({'message': 'Face found'})
+
+
 @app.route('/')
 def intro():
     return render_template('intro.html')
@@ -73,16 +89,13 @@ def intro():
 
 @app.route('/documentation')
 def documentation():
-    # Replace with the code to render your documentation page
     return render_template('doc.html')
 
 
 @app.route('/help')
 def help():
-    # Replace with the code to render your help page
     return render_template('help.html')
 
 
 if __name__ == '__main__':
-    # Threaded option to enable multiple instances for multiple user access support
     app.run(port=8000, debug=True, threaded=True, host='0.0.0.0')
