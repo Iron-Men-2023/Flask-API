@@ -35,7 +35,7 @@ class FirebaseImageRecognizer:
         print("No face found")
         return None
 
-    def process_image(self, image_path, user_id):
+    def process_image(self, image_path, user_id, num_of_faces):
         blob = self.bucket.blob(image_path)
         expiration = int(datetime.now().timestamp() + 600)
         print(blob.generate_signed_url(expiration))
@@ -46,7 +46,7 @@ class FirebaseImageRecognizer:
 
         save_path = os.path.join("imagesTest", "test.png")
         self.save_image(image, save_path)
-        face_data = self.sfr.detect_known_faces(image)
+        face_data = self.sfr.detect_known_faces(image, num_of_faces)
         if face_data:
             print("Face found in image: ", face_data)
             if user_id is not None:

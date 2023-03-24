@@ -28,10 +28,11 @@ def facial_recognition():
         user_id = jsonData['user_id']
     except KeyError:
         user_id = None
-    if user_id is None:
-        face_data, recents = recognizer.process_image(path, None)
-    else:
-        face_data, recents = recognizer.process_image(path, user_id)
+    try:
+        num_of_faces = jsonData['num_of_faces']
+    except KeyError:
+        num_of_faces = 1
+    face_data, recents = recognizer.process_image(path, user_id, num_of_faces)
     print("Face data from class: ", face_data)
 
     if face_data is None:
