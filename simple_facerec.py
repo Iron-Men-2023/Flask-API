@@ -37,7 +37,7 @@ class RecognitionHelper:
             (filename, ext) = os.path.splitext(basename)
 
             # Get encoding
-            img_encoding_list = face_recognition.face_encodings(rgb_img, num_jitters=200)
+            img_encoding_list = face_recognition.face_encodings(rgb_img, num_jitters=100)
             # if len(img_encoding_list) == 0:
             #     print(f"No face found in {img_path}. Enhancing image.")
             #     enhanced_img = self.enhance_image(img_resize)
