@@ -10,7 +10,7 @@ class RecognitionHelper:
         self.names = []
         self.encodings = []
         # Resize frame for a faster speed
-        self.resizedFrame = 0.20
+        self.resizedFrame = 0.25
 
     def enhance_image(self, img):
         ycrcb = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
@@ -37,12 +37,12 @@ class RecognitionHelper:
             (filename, ext) = os.path.splitext(basename)
 
             # Get encoding
-            img_encoding_list = face_recognition.face_encodings(rgb_img, num_jitters=100)
-            if len(img_encoding_list) == 0:
-                print(f"No face found in {img_path}. Enhancing image.")
-                enhanced_img = self.enhance_image(img_resize)
-                rgb_enhanced_img = cv2.cvtColor(enhanced_img, cv2.COLOR_BGR2RGB)
-                img_encoding_list = face_recognition.face_encodings(rgb_enhanced_img, num_jitters=50)
+            img_encoding_list = face_recognition.face_encodings(rgb_img, num_jitters=200)
+            # if len(img_encoding_list) == 0:
+            #     print(f"No face found in {img_path}. Enhancing image.")
+            #     enhanced_img = self.enhance_image(img_resize)
+            #     rgb_enhanced_img = cv2.cvtColor(enhanced_img, cv2.COLOR_BGR2RGB)
+            #     img_encoding_list = face_recognition.face_encodings(rgb_enhanced_img, num_jitters=150)
 
             if len(img_encoding_list) > 0:
                 img_encoding = img_encoding_list[0]
@@ -70,12 +70,7 @@ class RecognitionHelper:
         (filename, ext) = os.path.splitext(basename)
 
         # Get encoding
-        img_encoding_list = face_recognition.face_encodings(rgb_img, num_jitters=55)
-        if len(img_encoding_list) == 0:
-            print(f"No face found in {path}. Enhancing image.")
-            enhanced_img = self.enhance_image(img_resize)
-            rgb_enhanced_img = cv2.cvtColor(enhanced_img, cv2.COLOR_BGR2RGB)
-            img_encoding_list = face_recognition.face_encodings(rgb_enhanced_img, num_jitters=45)
+        img_encoding_list = face_recognition.face_encodings(rgb_img, num_jitters=25)
 
         if len(img_encoding_list) > 0:
             img_encoding = img_encoding_list[0]
@@ -100,7 +95,7 @@ class RecognitionHelper:
         # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
         rgb_small_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
         face_locations = face_recognition.face_locations(rgb_small_frame, number_of_times_to_upsample=4)
-        face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations, num_jitters=55)
+        face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations, num_jitters=50)
 
         face_names = []
         if len(face_encodings) > 0:
