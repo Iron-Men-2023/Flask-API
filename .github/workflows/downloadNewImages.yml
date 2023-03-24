@@ -7,12 +7,11 @@ on:
     # Runs every 4 hours
     - cron: "0 */4 * * *"
   push:
-    # Sequence of patterns matched against refs/heads
     branches:    
       - main
 
 jobs:
-  update_database:
+  update_database_train_model:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -22,6 +21,14 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: "3.8"
+
+    - name: Cache Python dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
     - name: Install dependencies
       run: |
@@ -40,3 +47,4 @@ jobs:
         git add .
         git commit -m "Update face database" || echo "No changes to commit"
         git push
+
