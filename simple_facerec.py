@@ -1,5 +1,3 @@
-import time
-
 import face_recognition
 import cv2
 import os
@@ -39,14 +37,12 @@ class RecognitionHelper:
             (filename, ext) = os.path.splitext(basename)
 
             # Get encoding
-            face_locations = face_recognition.face_locations(rgb_img, number_of_times_to_upsample=2, model="cnn")
-            img_encoding_list = face_recognition.face_encodings(rgb_img, face_locations, num_jitters=100)
+            img_encoding_list = face_recognition.face_encodings(rgb_img, num_jitters=200)
             # if len(img_encoding_list) == 0:
             #     print(f"No face found in {img_path}. Enhancing image.")
             #     enhanced_img = self.enhance_image(img_resize)
             #     rgb_enhanced_img = cv2.cvtColor(enhanced_img, cv2.COLOR_BGR2RGB)
             #     img_encoding_list = face_recognition.face_encodings(rgb_enhanced_img, num_jitters=150)
-            print(f"Encoding {filename}...")
 
             if len(img_encoding_list) > 0:
                 img_encoding = img_encoding_list[0]
@@ -58,7 +54,7 @@ class RecognitionHelper:
                 # np.save("encodings/{}.npy".format(filename), img_encoding)
             else:
                 print(f"No face found in {img_path} even after enhancement.")
-        np.save("encodings/{}.npy".format('trainedEncodings'), self.encodings)
+        np.save("encodings/{}.npy".format('trainedEncodings'),  self.encodings)
         # save the names to a file
         np.save("encodings/{}.npy".format('trainedNames'), self.names)
         print("Encoding images loaded")
@@ -89,7 +85,7 @@ class RecognitionHelper:
         print("Encoding images loaded")
         return False
 
-    def detect_known_faces(self, frame, num_of_faces):
+    def detect_known_faces(self, frame):
         print("Detecting faces")
         if frame is None:
             print("Frame is None")
@@ -98,65 +94,64 @@ class RecognitionHelper:
         small_frame = cv2.resize(frame, (0, 0), fx=self.resizedFrame, fy=self.resizedFrame)
         # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
         rgb_small_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
-        start = time.time()
-        if num_of_faces == 1:
-            face_locations = face_recognition.face_locations(rgb_small_frame)
-            face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
-        elif num_of_faces == 2:
-            face_locations = face_recognition.face_locations(rgb_small_frame, number_of_times_to_upsample=2,
-                                                             model="cnn")
-            face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations, num_jitters=100)
-        else:
-            face_locations = face_recognition.face_locations(rgb_small_frame, number_of_times_to_upsample=4,
-                                                             model="cnn")
-            face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations, num_jitters=100)
-        if len(face_encodings) == 0:
-            print("No face found")
-            start1 = time.time()
-            # try to enhance the image and detect again
-            enhanced_img = self.enhance_image(small_frame)
-            rgb_enhanced_img = cv2.cvtColor(enhanced_img, cv2.COLOR_BGR2RGB)
-            face_locations = face_recognition.face_locations(rgb_enhanced_img)
-            face_encodings = face_recognition.face_encodings(rgb_enhanced_img, face_locations, num_jitters=10)
-            elapsed1 = time.time() - start1
-            print("Enhanced image detection took {} seconds".format(elapsed1))
-            if len(face_encodings) > 0:
-                return self.process_encodings(face_encodings, face_locations)
-            else:
-                return None, None
-        elif len(face_encodings) > 0:
-            elapsed = time.time() - start
-            print("Face detection encodings took {} seconds".format(elapsed))
-            return self.process_encodings(face_encodings, face_locations)
+        face_locations = face_recognition.face_locations(rgb_small_frame, number_of_times_to_upsample=2)
+        face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations, num_jitters=100)
 
-    def process_encodings(self, face_encodings, face_locations):
-        # load encodings from file
         face_names = []
-        start_time = time.time()
-        for face_encoding in face_encodings:
-            # load encodings from file
-            encodings = np.load("encodings/trainedEncodings.npy", allow_pickle=True)
-            # See if the face is a match for the known face(s)
-            matches = face_recognition.compare_faces(encodings, face_encoding)
-            name = "Unknown"
+        if len(face_encodings) > 0:
+            for face_encoding in face_encodings:
+                # load encodings from file
+                encodings = np.load("encodings/trainedEncodings.npy", allow_pickle=True)
+                # See if the face is a match for the known face(s)
+                matches = face_recognition.compare_faces(encodings, face_encoding)
+                name = "Unknown"
 
-            # Or instead, use the known face with the smallest distance to the new face
-            face_distances = face_recognition.face_distance(encodings, face_encoding)
-            best_match_index = np.argmin(face_distances)
-            # load the names from file
-            names = np.load("encodings/trainedNames.npy", allow_pickle=True)
-            if matches[best_match_index]:
-                name = names[best_match_index]
-            face_names.append(name)
-            elapsed_time = time.time() - start_time
-            print("Face found: {}".format(name))
-        elapsed_time = time.time() - start_time
-        print("Elapsed time for finding Face: {}".format(elapsed_time))
-        print("Face locations: {}".format(face_locations))
-        # Convert to a dictionary and label which ones are top, right, bottom, left
-        face_locations = np.array(face_locations)
-        face_locations = (face_locations / self.resizedFrame).astype(int)
+                # Or instead, use the known face with the smallest distance to the new face
+                face_distances = face_recognition.face_distance(encodings, face_encoding)
+                best_match_index = np.argmin(face_distances)
+                # load the names from file
+                names = np.load("encodings/trainedNames.npy", allow_pickle=True)
+                if matches[best_match_index]:
+                    name = names[best_match_index]
+                face_names.append(name)
+                print("Face found: {}".format(name))
 
-        face_data = [{"name": name, "location": {"top": loc[0], "right": loc[1], "bottom": loc[2], "left": loc[3]}}
-                     for name, loc in zip(face_names, face_locations)]
-        return face_data
+            print("Face locations: {}".format(face_locations))
+            # Convert to a dictionary and label which ones are top, right, bottom, left
+            face_locations = np.array(face_locations)
+            face_locations = (face_locations / self.resizedFrame).astype(int)
+
+            face_data = [{"name": name, "location": {"top": loc[0], "right": loc[1], "bottom": loc[2], "left": loc[3]}}
+                         for name, loc in zip(face_names, face_locations)]
+            return face_data
+        else:
+            print("No face found. Enhancing image.")
+            # enhanced_small_frame = self.enhance_image(small_frame)
+            # rgb_enhanced_small_frame = cv2.cvtColor(enhanced_small_frame, cv2.COLOR_BGR2RGB)
+            # face_locations = face_recognition.face_locations(rgb_enhanced_small_frame)
+            # face_encodings = face_recognition.face_encodings(rgb_enhanced_small_frame, face_locations)
+            #
+            # if len(face_encodings) > 0:
+            #     for face_encoding in face_encodings:
+            #         # See if the face is a match for the known face(s)
+            #         matches = face_recognition.compare_faces(self.encodings, face_encoding)
+            #         name = "Unknown"
+            #
+            #         # Or instead, use the known face with the smallest distance to the new face
+            #         face_distances = face_recognition.face_distance(self.encodings, face_encoding)
+            #         best_match_index = np.argmin(face_distances)
+            #         if matches[best_match_index]:
+            #             name = self.names[best_match_index]
+            #         face_names.append(name)
+            #         print("Face found: {}".format(name))
+            #
+            #     face_locations = np.array(face_locations)
+            #     face_locations = (face_locations / self.resizedFrame).astype(int)
+            #
+            #     face_data = [
+            #         {"name": name, "location": {"top": loc[0], "right": loc[1], "bottom": loc[2], "left": loc[3]}}
+            #         for name, loc in zip(face_names, face_locations)]
+            #     return face_data
+            # else:
+            #     print("No face found even after enhancement.")
+            return None
