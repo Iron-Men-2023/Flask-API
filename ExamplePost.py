@@ -40,7 +40,7 @@ class FacialRecognitionAPI:
 
 
 # https://flask-api-omnilense.herokuapp.com
-api = FacialRecognitionAPI("https://flask-api-omnilense.herokuapp.com")
+api = FacialRecognitionAPI("http://172.17.117.8:8000")
 # Example of a user ID
 user_id = "LfqBYBcq1BhHUvmE7803PhCFxeI2"
 path = "images/ml_images/{}.jpg".format(user_id)
