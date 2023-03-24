@@ -14,8 +14,13 @@ recognizer = FirebaseImageRecognizer("omnilens-d5745-firebase-adminsdk-rorof-df4
 
 @app.route('/api/facial_recognition', methods=['POST'])
 def facial_recognition():
-    jsonData = request.get_json()
-    jsonData = json.loads(jsonData)
+    print("Request: ", request.data)
+    try:
+        jsonData = request.data.decode('utf-8')
+        jsonData = json.loads(jsonData)
+    except AttributeError:
+        jsonData = request.get_json()
+        jsonData = json.loads(jsonData)
     print(type(jsonData))
     path = jsonData['path']
     print("Path: ", path)
