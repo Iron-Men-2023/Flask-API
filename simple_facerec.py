@@ -10,7 +10,7 @@ class RecognitionHelper:
         self.names = []
         self.encodings = []
         # Resize frame for a faster speed
-        self.resizedFrame = 0.25
+        self.resizedFrame = 0.125
 
     def enhance_image(self, img):
         ycrcb = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
