@@ -1,2 +1,8 @@
 /misc/
-
+/node_modules/
+.idea/
+.vscode/
+*.iml
+*.log
+*.swp
+*.swo
