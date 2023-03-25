@@ -36,21 +36,26 @@ class FirebaseImageRecognizer:
         return None
 
     def process_image(self, image_path, user_id, num_of_faces):
-        blob = self.bucket.blob(image_path)
-        expiration = int(datetime.now().timestamp() + 600)
-        print(blob.generate_signed_url(expiration))
-
-        image_bytes = blob.download_as_bytes()
-        image_array = np.asarray(bytearray(image_bytes), dtype=np.uint8)
-        image = cv2.imdecode(image_array, -1)
-
-        save_path = os.path.join("imagesTest", "test.png")
-        self.save_image(image, save_path)
+        # blob = self.bucket.blob(image_path)
+        # expiration = int(datetime.now().timestamp() + 600)
+        # print(blob.generate_signed_url(expiration))
+        #
+        # image_bytes = blob.download_as_bytes()
+        # image_array = np.asarray(bytearray(image_bytes), dtype=np.uint8)
+        # image = cv2.imdecode(image_array, -1)
+        #
+        # save_path = os.path.join("imagesTest", "test.png")
+        # self.save_image(image, save_path)
+        image = cv2.imread(image_path)
         face_data = self.sfr.detect_known_faces(image, num_of_faces)
         if face_data:
             print("Face found in image: ", face_data)
             if user_id is not None:
-                recents = self.add_to_recents(user_id, [face["name"] for face in face_data])
+                try:
+                    recents = self.add_to_recents(user_id, [face["name"] for face in face_data])
+                except Exception as e:
+                    print(e)
+                    recents = None
             else:
                 recents = None
             return face_data, recents

@@ -1,3 +1,5 @@
+import time
+
 import face_recognition
 import cv2
 import os
@@ -96,6 +98,7 @@ class RecognitionHelper:
         small_frame = cv2.resize(frame, (0, 0), fx=self.resizedFrame, fy=self.resizedFrame)
         # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
         rgb_small_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
+        start = time.time()
         if num_of_faces == 1:
             face_locations = face_recognition.face_locations(rgb_small_frame)
             face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
@@ -109,22 +112,27 @@ class RecognitionHelper:
             face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations, num_jitters=100)
         if len(face_encodings) == 0:
             print("No face found")
+            start1 = time.time()
             # try to enhance the image and detect again
             enhanced_img = self.enhance_image(small_frame)
             rgb_enhanced_img = cv2.cvtColor(enhanced_img, cv2.COLOR_BGR2RGB)
-            face_locations = face_recognition.face_locations(rgb_enhanced_img, number_of_times_to_upsample=4,
-                                                             model="cnn")
-            face_encodings = face_recognition.face_encodings(rgb_enhanced_img, face_locations, num_jitters=125)
+            face_locations = face_recognition.face_locations(rgb_enhanced_img)
+            face_encodings = face_recognition.face_encodings(rgb_enhanced_img, face_locations, num_jitters=10)
+            elapsed1 = time.time() - start1
+            print("Enhanced image detection took {} seconds".format(elapsed1))
             if len(face_encodings) > 0:
                 return self.process_encodings(face_encodings, face_locations)
             else:
                 return None, None
         elif len(face_encodings) > 0:
+            elapsed = time.time() - start
+            print("Face detection encodings took {} seconds".format(elapsed))
             return self.process_encodings(face_encodings, face_locations)
 
     def process_encodings(self, face_encodings, face_locations):
         # load encodings from file
         face_names = []
+        start_time = time.time()
         for face_encoding in face_encodings:
             # load encodings from file
             encodings = np.load("encodings/trainedEncodings.npy", allow_pickle=True)
@@ -140,7 +148,10 @@ class RecognitionHelper:
             if matches[best_match_index]:
                 name = names[best_match_index]
             face_names.append(name)
+            elapsed_time = time.time() - start_time
             print("Face found: {}".format(name))
+        elapsed_time = time.time() - start_time
+        print("Elapsed time for finding Face: {}".format(elapsed_time))
         print("Face locations: {}".format(face_locations))
         # Convert to a dictionary and label which ones are top, right, bottom, left
         face_locations = np.array(face_locations)

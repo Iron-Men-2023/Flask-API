@@ -1,10 +1,14 @@
 import json
+import time
 
 import numpy as np
 from flask import Flask, request, jsonify, render_template
 from downloadImgAndRec import FirebaseImageRecognizer
 from simple_facerec import RecognitionHelper
 from flask_cors import CORS
+import base64
+import io
+from PIL import Image
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -18,13 +22,17 @@ def facial_recognition():
     try:
         jsonData = request.data.decode('utf-8')
         jsonData = json.loads(jsonData)
-        path = jsonData['path']
+        image_base64 = jsonData['image']
+
     except:
         jsonData = request.get_json()
         jsonData = json.loads(jsonData)
-        path = jsonData['path']
+        image_base64 = jsonData['image']
+
+    user_id = jsonData['user_id']
+    image = base64_to_image(image_base64)
+    image_path = save_image(image, user_id)
     print(type(jsonData))
-    print("Path: ", path)
     try:
         user_id = jsonData['user_id']
     except KeyError:
@@ -33,7 +41,9 @@ def facial_recognition():
         num_of_faces = jsonData['num_of_faces']
     except KeyError:
         num_of_faces = 1
-    face_data, recents = recognizer.process_image(path, user_id, num_of_faces)
+    start = time.time()
+    face_data, recents = recognizer.process_image(image_path, user_id, num_of_faces)
+    print("Time taken to process image: ", time.time() - start)
     print("Face data from class: ", face_data)
 
     if face_data is None:
@@ -57,6 +67,20 @@ def facial_recognition():
         except Exception as e:
             print("Error: ", e)
             return jsonify({'message': 'Error'})
+
+
+def base64_to_image(base64_str):
+    img_data = base64.b64decode(base64_str)
+    img = Image.open(io.BytesIO(img_data))
+    return img
+
+
+def save_image(image, user_id):
+    # rotate image 90 degrees
+    image = image.rotate(270, expand=True)
+    filename = f'imagesTest/{user_id}.jpg'
+    image.save(filename, 'JPEG')
+    return filename
 
 
 @app.route('/api/facial_recognition', methods=['OPTIONS'])
