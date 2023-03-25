@@ -4,3 +4,5 @@
 *.ipr
 package-lock.json
 package.json
+yarn.lock
+__pycache__/
