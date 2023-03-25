@@ -23,15 +23,17 @@ def facial_recognition():
         jsonData = request.data.decode('utf-8')
         jsonData = json.loads(jsonData)
         image_base64 = jsonData['image']
+        device_sent_from = jsonData['device_sent_from']
 
     except:
         jsonData = request.get_json()
         jsonData = json.loads(jsonData)
         image_base64 = jsonData['image']
+        device_sent_from = jsonData['device_sent_from']
 
     user_id = jsonData['user_id']
     image = base64_to_image(image_base64)
-    image_path = save_image(image, user_id)
+    image_path = save_image(image, user_id, device_sent_from)
     print(type(jsonData))
     try:
         user_id = jsonData['user_id']
@@ -75,9 +77,9 @@ def base64_to_image(base64_str):
     return img
 
 
-def save_image(image, user_id):
-    # rotate image 90 degrees
-    image = image.rotate(270, expand=True)
+def save_image(image, user_id, device_sent_from):
+    if device_sent_from == "app":
+        image = image.rotate(270, expand=True)
     filename = f'imagesTest/{user_id}.jpg'
     image.save(filename, 'JPEG')
     return filename

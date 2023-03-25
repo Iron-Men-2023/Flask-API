@@ -50,15 +50,15 @@ class FirebaseImageRecognizer:
         face_data = self.sfr.detect_known_faces(image, num_of_faces)
         if face_data:
             print("Face found in image: ", face_data)
-            if user_id is not None:
-                try:
-                    recents = self.add_to_recents(user_id, [face["name"] for face in face_data])
-                except Exception as e:
-                    print(e)
-                    recents = None
-            else:
-                recents = None
-            return face_data, recents
+            # if user_id is not None:
+            #     try:
+            #         recents = self.add_to_recents(user_id, [face["name"] for face in face_data])
+            #     except Exception as e:
+            #         print(e)
+            #         recents = None
+            # else:
+            #     recents = None
+            return face_data, None
         # methods = ["INTER_NEAREST", "INTER_LINEAR", "INTER_CUBIC", "INTER_LANCZOS4"]
         # start_time = time.time()
         # elapsed_time = 0

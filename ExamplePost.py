@@ -1,5 +1,5 @@
+import base64
 import json
-
 import requests
 import time
 
@@ -8,11 +8,12 @@ class FacialRecognitionAPI:
     def __init__(self, base_url):
         self.base_url = base_url
 
-    def recognize_face(self, path, user_id):
+    def recognize_face(self, path, user_id, device_sent_from="web"):
         url = f"{self.base_url}/api/facial_recognition"
-        data = {"path": path, "user_id": user_id, "num_of_faces": 1}
-        data = json.dumps(data)
+        with open(path, "rb") as image_file:
+            encoded_image = base64.b64encode(image_file.read()).decode("utf-8")
 
+        data = {"image": encoded_image, "user_id": user_id, "num_of_faces": 1, "device_sent_from": device_sent_from}
         try:
             response = requests.post(url, json=data)
 
@@ -40,13 +41,13 @@ class FacialRecognitionAPI:
             return None
 
 
+# http://192.168.0.233:8000
 # https://flask-api-omnilense.herokuapp.com
-# http://172.17.117.8:8000
-api = FacialRecognitionAPI("http://192.168.0.119:8000")
-# Example of a user ID
+api = FacialRecognitionAPI("http://192.168.0.233:8000")
 user_id = "LfqBYBcq1BhHUvmE7803PhCFxeI2"
-path = "images/ml_images/{}.jpg".format(user_id)
+path = "imagesTest/{}.jpg".format(user_id)
+
 start = time.time()
-result = api.recognize_face(path, user_id)
+result = api.recognize_face(path, user_id, "web")
 print(time.time() - start)
 print(result)
