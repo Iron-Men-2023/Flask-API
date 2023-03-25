@@ -37,12 +37,14 @@ class RecognitionHelper:
             (filename, ext) = os.path.splitext(basename)
 
             # Get encoding
-            img_encoding_list = face_recognition.face_encodings(rgb_img, num_jitters=100)
+            face_locations = face_recognition.face_locations(rgb_img, number_of_times_to_upsample=2, model="cnn")
+            img_encoding_list = face_recognition.face_encodings(rgb_img, face_locations, num_jitters=100)
             # if len(img_encoding_list) == 0:
             #     print(f"No face found in {img_path}. Enhancing image.")
             #     enhanced_img = self.enhance_image(img_resize)
             #     rgb_enhanced_img = cv2.cvtColor(enhanced_img, cv2.COLOR_BGR2RGB)
             #     img_encoding_list = face_recognition.face_encodings(rgb_enhanced_img, num_jitters=150)
+            print(f"Encoding {filename}...")
 
             if len(img_encoding_list) > 0:
                 img_encoding = img_encoding_list[0]

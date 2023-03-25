@@ -18,11 +18,12 @@ def facial_recognition():
     try:
         jsonData = request.data.decode('utf-8')
         jsonData = json.loads(jsonData)
-    except AttributeError:
+        path = jsonData['path']
+    except:
         jsonData = request.get_json()
         jsonData = json.loads(jsonData)
+        path = jsonData['path']
     print(type(jsonData))
-    path = jsonData['path']
     print("Path: ", path)
     try:
         user_id = jsonData['user_id']
