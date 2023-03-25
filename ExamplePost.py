@@ -12,7 +12,6 @@ class FacialRecognitionAPI:
         url = f"{self.base_url}/api/facial_recognition"
         with open(path, "rb") as image_file:
             encoded_image = base64.b64encode(image_file.read()).decode("utf-8")
-
         data = {"image": encoded_image, "user_id": user_id, "num_of_faces": 1, "device_sent_from": device_sent_from}
         try:
             response = requests.post(url, json=data)
@@ -45,7 +44,7 @@ class FacialRecognitionAPI:
 # https://flask-api-omnilense.herokuapp.com
 api = FacialRecognitionAPI("https://flask-api-omnilense.herokuapp.com")
 user_id = "LfqBYBcq1BhHUvmE7803PhCFxeI2"
-path = "imagesTest/{}.jpg".format(user_id)
+path = "imagesTest/kelly.jpeg"
 
 start = time.time()
 result = api.recognize_face(path, user_id, "web")
