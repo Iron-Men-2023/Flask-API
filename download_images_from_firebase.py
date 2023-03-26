@@ -67,6 +67,7 @@ class FirebaseImageDownloader:
                         else:
                             # Save the image with the next number
                             cv2.imwrite(self.download_folder + user + "/img" + str(last_number + 1) + ".jpg", image)
+                            print('image saved')
                 except KeyError:
                     continue
 
