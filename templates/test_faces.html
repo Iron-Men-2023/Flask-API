@@ -1,0 +1,101 @@
+{% extends "base.html" %} {% block title %} Test Faces Page {% endblock %} {%
+block content %}
+
+<h1>Test Faces</h1>
+<div class="test-faces-content">
+  <div class="image-wrapper">
+    <div class="image-grid">
+      {% for image_path, prediction in image_prediction_pairs %}
+      <div class="images-container">
+        <img
+          class="image-thumbnail"
+          src="{{ image_path }}"
+          alt="{{ prediction }}"
+          width="200"
+          height="200"
+        />
+        <p>Prediction: {{ prediction }}</p>
+        <button
+          class="feedback-btn"
+          onclick="updateModel('{{ image_path }}', 'yes', '{{ prediction }}')"
+        >
+          Yes
+        </button>
+        <button
+          class="feedback-btn"
+          onclick="showInputField('{{ image_path }}', '{{ prediction }}')"
+        >
+          No
+        </button>
+        {% if prediction == "Unknown" %}
+        <input
+          type="text"
+          id="input-{{ image_path }}"
+          placeholder="Enter identity"
+          onkeypress="handleKeyPress(event, '{{ image_path }}', '{{ prediction }}')"
+          style="display: block"
+        />
+        <button
+          class="feedback-btn"
+          onclick="updateModel('{{ image_path }}', 'no', '{{ prediction }}')"
+        >
+          Enter
+        </button>
+        {% else %}
+        <input
+          type="text"
+          id="input-{{ image_path }}"
+          placeholder="Enter identity"
+          onkeypress="handleKeyPress(event, '{{ image_path }}', '{{ prediction }}')"
+          style="display: none"
+        />
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<script>
+  function showInputField(image_path, prediction) {
+    document.getElementById("input-" + image_path).style.display = "block";
+  }
+
+  function handleKeyPress(event, image_path, prediction) {
+    if (event.key === "Enter") {
+      updateModel(image_path, "no", prediction);
+    }
+  }
+
+  function updateModel(image_path, answer, prediction) {
+    const inputField = document.getElementById("input-" + image_path);
+    const identity = inputField.value;
+    console.log("Updating model with image_path:", image_path);
+    fetch("/api/facial_recognition/feedback", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        image_path: image_path,
+        answer: answer,
+        prediction: prediction,
+        identity: identity,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Model updated:", data);
+        if (data["delete"] === true) {
+          console.log("Image deleted:", image_path);
+        }
+        // Refresh the page
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.error("Error updating the model:", error);
+        // Refresh the page
+        // window.location.reload();
+      });
+  }
+</script>
+{% endblock %}

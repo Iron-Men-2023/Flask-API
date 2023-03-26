@@ -37,6 +37,6 @@ typing-extensions
 Werkzeug
 zipp
 flask-cors==3.0.10
-
 pillow~=9.4.0
 requests~=2.28.1
+ujson~=5.4.0

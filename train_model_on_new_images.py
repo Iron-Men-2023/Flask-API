@@ -4,7 +4,7 @@ from simple_facerec import RecognitionHelper
 
 def train():
     recognizer = RecognitionHelper()
-    recognizer.load_images("images")
+    recognizer.load_images("static/images")
 
 
 if __name__ == "__main__":
