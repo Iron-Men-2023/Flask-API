@@ -53,6 +53,7 @@ class FirebaseImageDownloader:
                     # Check if the folder is empty
                     if len(os.listdir(self.download_folder + user)) == 0:
                         cv2.imwrite(self.download_folder + user + "/img1.jpg", image)
+                        print('image saved')
                     else:
                         # Get the list of images in the folder
                         files = os.listdir(self.download_folder + user)
@@ -61,13 +62,13 @@ class FirebaseImageDownloader:
                         # Get the last number in the image name
                         last_number = int(last_image[3:-4])
                         # Check if the image is similar to the last image in the folder
-                        if self.check_image_similarity(self.download_folder + user + "/" + last_image,
-                                                       "imagesTest/temp.jpg"):
-                            continue
-                        else:
-                            # Save the image with the next number
-                            cv2.imwrite(self.download_folder + user + "/img" + str(last_number + 1) + ".jpg", image)
-                            print('image saved')
+                        # if self.check_image_similarity(self.download_folder + user + "/" + last_image,
+                        #                                "imagesTest/temp.jpg"):
+                        #     continue
+                        # else:
+                        # Save the image with the next number
+                        cv2.imwrite(self.download_folder + user + "/img" + str(last_number + 1) + ".jpg", image)
+                        print('image saved')
                 except KeyError:
                     continue
 
