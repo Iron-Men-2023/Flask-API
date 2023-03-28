@@ -76,11 +76,6 @@ class RecognitionHelper:
         img_encoding_list = face_recognition.face_encodings(rgb_img, face_locations, num_jitters=25)
 
         if len(img_encoding_list) > 0:
-            img_encoding = img_encoding_list[0]
-
-            # Store file name and file encoding
-            self.encodings.append(img_encoding)
-            self.names.append(filename)
             return True
         else:
             print(f"No face found in {path} even after enhancement.")
@@ -160,7 +155,12 @@ class RecognitionHelper:
 
     def update_model(self, feedback_data):
         img_path = feedback_data["image_path"]
+        print("Updating model with image: {}".format(img_path))
         if self.load_single_img(img_path):
+            # load the names from file
+            self.names = np.load("encodings/trainedNames.npy", allow_pickle=True)
+            # load encodings from file
+            self.encodings = np.load("encodings/trainedEncodings.npy", allow_pickle=True)
             index = -1
             if feedback_data["answer"] == "Yes":
                 correct_name = feedback_data["prediction"]

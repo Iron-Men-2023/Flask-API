@@ -1,4 +1,5 @@
 import json
+import math
 import time
 import os
 import numpy as np
@@ -97,20 +98,30 @@ def handle_options():
 
 @app.route('/test_faces')
 def test_faces():
-    image_folder = 'static/images'
-    image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
-    image_paths = [os.path.join(image_folder, f) for f in image_files]
+    folder_path = 'static/images'
+    image_paths = []
+    for folder in os.listdir(folder_path):
+        folder_path_full = os.path.join(folder_path, folder)
+        # Go through each image in the folder and get the full path
+        for image_filename in os.listdir(folder_path_full):
+            image_path = os.path.join(folder_path_full, image_filename)
+            image_paths.append(image_path)
+            break
     predictions = []
-
+    confidence_list = []
     for image_path in image_paths:
+        print("Image path: ", image_path)
         # Get the prediction for the image
         face_data, _ = recognizer.process_image(image_path, None, 1)
         if face_data is not None:
             predictions.append(face_data[0]['name'])
+            confidence = round(face_data[0]['confidence'], 2)
+            confidence_list.append(confidence)
         else:
             predictions.append('Unknown')
+            confidence_list.append(0.00)
 
-    image_prediction_pairs = zip(image_paths, predictions)
+    image_prediction_pairs = zip(image_paths, predictions, confidence_list)
     return render_template('test_faces.html', image_prediction_pairs=image_prediction_pairs)
 
 

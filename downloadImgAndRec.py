@@ -7,6 +7,7 @@ import firebase_admin
 from firebase_admin import credentials, storage, firestore
 import os
 
+
 def upscale_image(image, method):
     result = cv2.resize(image, None, fx=4, fy=4, interpolation=getattr(cv2, method))
     return result
@@ -36,44 +37,11 @@ class FirebaseImageRecognizer:
         return None
 
     def process_image(self, image_path, user_id, num_of_faces):
-        # blob = self.bucket.blob(image_path)
-        # expiration = int(datetime.now().timestamp() + 600)
-        # print(blob.generate_signed_url(expiration))
-        #
-        # image_bytes = blob.download_as_bytes()
-        # image_array = np.asarray(bytearray(image_bytes), dtype=np.uint8)
-        # image = cv2.imdecode(image_array, -1)
-        #
-        # save_path = os.path.join("imagesTest", "test.png")
-        # self.save_image(image, save_path)
         image = cv2.imread(image_path)
         face_data = self.sfr.detect_known_faces(image, num_of_faces)
         if face_data:
             print("Face found in image: ", face_data)
-            # if user_id is not None:
-            #     try:
-            #         recents = self.add_to_recents(user_id, [face["name"] for face in face_data])
-            #     except Exception as e:
-            #         print(e)
-            #         recents = None
-            # else:
-            #     recents = None
             return face_data, None
-        # methods = ["INTER_NEAREST", "INTER_LINEAR", "INTER_CUBIC", "INTER_LANCZOS4"]
-        # start_time = time.time()
-        # elapsed_time = 0
-        # while elapsed_time < 6:
-        #     face_data = self.try_recognition(image, methods)
-        #     if face_data:
-        #         print("Face found in image: ", face_data)
-        #         if user_id is not None:
-        #             recents = self.add_to_recents(user_id, [face["name"] for face in face_data])
-        #         else:
-        #             recents = None
-        #         return face_data, recents
-        #
-        #     elapsed_time = time.time() - start_time
-
         return None, None
 
     def add_to_recents(self, user_id, face_names):
