@@ -42,9 +42,9 @@ def facial_recognition():
         except:
             raise Exception("Error getting data from request")
     image = base64_to_image(image_base64)
-    image_path = save_image(image, user_id, device_sent_from)
+    image_path = save_image(image, user_id)
     print("Time taken to get image: ", time.time() - start_time)
-    start1= time.time()
+    start1 = time.time()
     face_data, recents = recognizer.process_image(image_path, user_id, num_of_faces)
     print("Time taken to process image: ", time.time() - start1)
     print("Face data from class: ", face_data)
@@ -63,7 +63,8 @@ def facial_recognition():
             else:
                 recents_json = json.dumps(recents)
 
-            response_data = {'predicted_person': face_names, 'recents': recents_json, "face_loc": face_loc, "confidence": confidence,
+            response_data = {'predicted_person': face_names, 'recents': recents_json, "face_loc": face_loc,
+                             "confidence": confidence,
                              'message': 'Face found'}
             jsonConv = jsonify(response_data)
 
@@ -79,9 +80,9 @@ def base64_to_image(base64_str):
     return img
 
 
-def save_image(image, user_id, device_sent_from):
+def save_image(image, user_id):
     # if device_sent_from == "app":
-        # image = image.rotate(180, expand=True)
+    # image = image.rotate(180, expand=True)
     filename = f'imagesTest/{user_id}.jpg'
     image.save(filename, 'JPEG')
     return filename
@@ -113,7 +114,6 @@ def test_faces():
     return render_template('test_faces.html', image_prediction_pairs=image_prediction_pairs)
 
 
-
 @app.route('/api/facial_recognition/feedback', methods=['POST'])
 def submit_feedback():
     # print(request.data)
@@ -125,7 +125,8 @@ def submit_feedback():
     print("Feedback data: ", feedback_data)
     update_model = recognizerHelper.update_model(feedback_data)
     if update_model:
-        return jsonify({'message': f'Feedback received: {answer} for image {image_path} with prediction {prediction}', 'delete': False})
+        return jsonify({'message': f'Feedback received: {answer} for image {image_path} with prediction {prediction}',
+                        'delete': False})
     else:
         # Delete the image from the database
         recognizerHelper.delete_image(image_path)
@@ -140,16 +141,31 @@ def get():
 
 @app.route('/api/facial_recognition/check', methods=['POST'])
 def check():
-    print(request.data)
-    requestForm = request.data.decode('utf-8')
-    requestForm = json.loads(requestForm)
-    path = requestForm['path']
-    user_id = requestForm['user_id']
-    print("Path: ", path)
-    download_to_path = "imagesTest/testProfile.{}.jpg".format(user_id)
-    load_img = recognizer.download_image(path, download_to_path)
+    start_time = time.time()
+    try:
+        form = request.form.to_dict()
+        user_id = form['user_id']
+        device_sent_from = form['device_sent_from']
+        print("Device sent from: ", device_sent_from)
+        image_base64 = form['image']
+    except:
+        try:
+            start_time1 = time.time()
+            # jsonData = request.data.decode('utf-8')
+            jsonData = ujson.loads(request.data)
+            image_base64 = jsonData['image']
+            device_sent_from = jsonData['device_sent_from']
+            user_id = jsonData['user_id']
+            print("Time taken to decode: ", time.time() - start_time1)
+
+        except:
+            raise Exception("Error getting data from request")
+    image = base64_to_image(image_base64)
+    image_path = save_image(image, user_id)
+    print("Image path: ", image_path)
     # Check if there is a face in the image
-    check_face = recognizerHelper.load_single_img(download_to_path)
+    check_face = recognizerHelper.load_single_img(image_path)
+    print("Time taken to get image: ", time.time() - start_time)
     if check_face is None:
         print("No face found")
         return jsonify({'message': 'No face found'})

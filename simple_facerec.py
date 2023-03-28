@@ -21,43 +21,40 @@ class RecognitionHelper:
         enhanced_img = cv2.cvtColor(ycrcb, cv2.COLOR_YCrCb2BGR)
         return enhanced_img
 
-    def load_images(self, images_path):
-        # Loading images from folder
-        images_path = glob.glob(os.path.join(images_path, "*.*"))
+    def train_on_images(self, folder_path):
+        for folder in os.listdir(folder_path):
+            folder_path_full = os.path.join(folder_path, folder)
+            # Go through each image in the folder and get the full path
+            for image_filename in os.listdir(folder_path_full):
+                image_path = os.path.join(folder_path_full, image_filename)
+                # Loading images from folder
+                print("Loading images from folder: {}".format(folder_path_full))
+                print("{} encoding images found.".format(len(os.listdir(folder_path_full))))
+                img = cv2.imread(image_path)
+                img_resize = cv2.resize(img, (0, 0), fx=self.resizedFrame, fy=self.resizedFrame)
+                rgb_img = cv2.cvtColor(img_resize, cv2.COLOR_BGR2RGB)
 
-        print("{} encoding images found.".format(len(images_path)))
+                # Get the filename only from the initial file path.
+                basename = os.path.basename(folder_path_full)
+                (filename, ext) = os.path.splitext(basename)
 
-        # Store image encoding and names
-        for img_path in images_path:
-            img = cv2.imread(img_path)
-            img_resize = cv2.resize(img, (0, 0), fx=self.resizedFrame, fy=self.resizedFrame)
-            rgb_img = cv2.cvtColor(img_resize, cv2.COLOR_BGR2RGB)
+                print("Filename: {}".format(filename))
 
-            # Get the filename only from the initial file path.
-            basename = os.path.basename(img_path)
-            (filename, ext) = os.path.splitext(basename)
+                # Get location of face
+                face_locations = face_recognition.face_locations(rgb_img, number_of_times_to_upsample=1,
+                                                                 model="cnn")
+                # Get encoding
+                img_encoding_list = face_recognition.face_encodings(rgb_img, face_locations, num_jitters=70)
 
-            # Get location of face
-            face_locations = face_recognition.face_locations(rgb_img, number_of_times_to_upsample=3, model="cnn")
-            # Get encoding
-            img_encoding_list = face_recognition.face_encodings(rgb_img, face_locations, num_jitters=200)
-            # if len(img_encoding_list) == 0:
-            #     print(f"No face found in {img_path}. Enhancing image.")
-            #     enhanced_img = self.enhance_image(img_resize)
-            #     rgb_enhanced_img = cv2.cvtColor(enhanced_img, cv2.COLOR_BGR2RGB)
-            #     img_encoding_list = face_recognition.face_encodings(rgb_enhanced_img, num_jitters=150)
+                if len(img_encoding_list) > 0:
+                    img_encoding = img_encoding_list[0]
 
-            if len(img_encoding_list) > 0:
-                img_encoding = img_encoding_list[0]
-
-                # Store file name and file encoding
-                self.encodings.append(img_encoding)
-                self.names.append(filename)
-                print(f"Encoding {filename} done.")
-                # Save the encoding to a file
-                # np.save("encodings/{}.npy".format(filename), img_encoding)
-            else:
-                print(f"No face found in {img_path} even after enhancement.")
+                    # Store file name and file encoding
+                    self.encodings.append(img_encoding)
+                    self.names.append(filename)
+                    print(f"Encoding {filename} done.")
+                else:
+                    print(f"No face found in {image_path} even after enhancement.")
         np.save("encodings/{}.npy".format('trainedEncodings'), self.encodings)
         # save the names to a file
         np.save("encodings/{}.npy".format('trainedNames'), self.names)
@@ -73,8 +70,10 @@ class RecognitionHelper:
         basename = os.path.basename(path)
         (filename, ext) = os.path.splitext(basename)
 
+        # Get location of face
+        face_locations = face_recognition.face_locations(rgb_img)
         # Get encoding
-        img_encoding_list = face_recognition.face_encodings(rgb_img, num_jitters=25)
+        img_encoding_list = face_recognition.face_encodings(rgb_img, face_locations, num_jitters=25)
 
         if len(img_encoding_list) > 0:
             img_encoding = img_encoding_list[0]
@@ -205,4 +204,3 @@ class RecognitionHelper:
         np.save("encodings/{}.npy".format('trainedNames'), self.names)
         print("Model updated")
         return True
-
