@@ -75,7 +75,7 @@ Content-Type: application/json
             var user_id = jq("#user-id-input").val();
 
             jq.ajax({
-                url: "http://172.17.100.231:8000/api/facial_recognition",
+                url: "https://flask-api-omnilense.herokuapp.com/api/facial_recognition",
                 type: "POST",
                 data: JSON.stringify({
                     user_id: user_id,
