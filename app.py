@@ -2,6 +2,8 @@ import json
 import math
 import time
 import os
+
+import cv2
 import numpy as np
 from flask import Flask, request, jsonify, render_template
 from downloadImgAndRec import FirebaseImageRecognizer
@@ -42,8 +44,11 @@ def facial_recognition():
 
         except:
             raise Exception("Error getting data from request")
-    image = base64_to_image(image_base64)
-    image_path = save_image(image, user_id)
+    if device_sent_from == "test":
+        image_path = "imagesTest/Kelly.jpeg"
+    else:
+        image = base64_to_image(image_base64)
+        image_path = save_image(image, user_id)
     print("Time taken to get image: ", time.time() - start_time)
     start1 = time.time()
     face_data, recents = recognizer.process_image(image_path, user_id, num_of_faces)

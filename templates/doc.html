@@ -1,16 +1,16 @@
 {% extends "base.html" %} {% block title %} Documentation Page {% endblock %}
 {%block content %}
 <div class="container">
-  <h1 class="my-4">API Documentation</h1>
+    <h1 class="my-4">API Documentation</h1>
 
-  <h2 class="my-3">Endpoints</h2>
+    <h2 class="my-3">Endpoints</h2>
 
-  <section class="my-3">
-    <h3>/api/facial_recognition</h3>
-    <p>Description of the endpoint.</p>
+    <section class="my-3">
+        <h3>/api/facial_recognition</h3>
+        <p>Description of the endpoint.</p>
 
-    <h4>Request</h4>
-    <pre>
+        <h4>Request</h4>
+        <pre>
 POST /https://flask-api-omnilense.herokuapp.com/api/facial_recognition HTTP/1.1
 Content-Type: application/json
 
@@ -20,8 +20,8 @@ Content-Type: application/json
 }
     </pre>
 
-    <h4>Example Response</h4>
-    <div id="example-response1" class="json-view">
+        <h4>Example Response</h4>
+        <div id="example-response1" class="json-view">
       <pre>
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -32,66 +32,68 @@ Content-Type: application/json
     "recents": ["Shows Recents"]
 }
             </pre
-      >
-    </div>
+            >
+        </div>
 
-    <h4>Example Call</h4>
-    <div id="example-response" class="json-view">
-      <!-- Example response will be populated by AJAX call -->
-    </div>
+        <h4>Example Call</h4>
+        <div id="example-response" class="json-view">
+            <!-- Example response will be populated by AJAX call -->
+        </div>
 
-    <label for="path-input">Path:</label>
-    <input
-      type="text"
-      id="path-input"
-      value="images/ml_images/LfqBYBcq1BhHUvmE7803PhCFxeI2.jpg"
-    />
+        <label for="path-input">Path:</label>
+        <input
+                type="text"
+                id="path-input"
+                value="images/ml_images/LfqBYBcq1BhHUvmE7803PhCFxeI2.jpg"
+        />
 
-    <label for="user-id-input">User ID:</label>
-    <input
-      type="text"
-      id="user-id-input"
-      value="LfqBYBcq1BhHUvmE7803PhCFxeI2"
-    />
+        <label for="user-id-input">User ID:</label>
+        <input
+                type="text"
+                id="user-id-input"
+                value="LfqBYBcq1BhHUvmE7803PhCFxeI2"
+        />
 
-    <button id="example-button" class="btn btn-primary my-3">
-      Make Example Call
-    </button>
-  </section>
-  <!-- Add more sections for other endpoints here -->
+        <button id="example-button" class="btn btn-primary my-3">
+            Make Example Call
+        </button>
+    </section>
+    <!-- Add more sections for other endpoints here -->
 </div>
 <!-- Add JavaScript and AJAX calls -->
 <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
 <link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.css"
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.css"
 />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.js"></script>
 
 <script>
-  (function (jq) {
-    jq("#example-button").click(function () {
-      var path = jq("#path-input").val();
-      var user_id = jq("#user-id-input").val();
+    (function (jq) {
+        jq("#example-button").click(function () {
+            var path = jq("#path-input").val();
+            var user_id = jq("#user-id-input").val();
 
-      jq.ajax({
-        url: "https://flask-api-omnilense.herokuapp.com/api/facial_recognition",
-        type: "POST",
-        data: JSON.stringify({
-          path: path,
-          user_id: user_id,
-        }),
-        dataType: "json",
-        contentType: "application/json",
-        success: function (response) {
-          // Populate example response div with JSON response
-          jq("#example-response").JSONView(response, { collapsed: true });
-        },
-        error: function (xhr, status, error) {
-          console.log(xhr.responseText);
-        },
-      });
-    });
-  })(jQuery);
+            jq.ajax({
+                url: "http://172.17.100.231:8000/api/facial_recognition",
+                type: "POST",
+                data: JSON.stringify({
+                    user_id: user_id,
+                    device_sent_from: "test",
+                    image: "test",
+                    num_of_faces: "1",
+                }),
+                dataType: "json",
+                contentType: "application/json",
+                success: function (response) {
+                    // Populate example response div with JSON response
+                    jq("#example-response").JSONView(response, {collapsed: true});
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.responseText);
+                },
+            });
+        });
+    })(jQuery);
 </script>
 {% endblock %}
