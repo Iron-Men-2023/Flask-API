@@ -47,6 +47,7 @@ def facial_recognition():
     if device_sent_from == "test":
         image_path = "imagesTest/Kelly.jpeg"
     else:
+        print("base64 image: ", image_base64[:100])
         image = base64_to_image(image_base64)
         image_path = save_image(image, user_id)
     print("Time taken to get image: ", time.time() - start_time)
@@ -90,6 +91,7 @@ def save_image(image, user_id):
     # if device_sent_from == "app":
     # image = image.rotate(180, expand=True)
     filename = f'imagesTest/{user_id}.jpg'
+    image = image.convert('RGB')  # Convert the image to RGB mode
     image.save(filename, 'JPEG')
     return filename
 

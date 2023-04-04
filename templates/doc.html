@@ -15,8 +15,10 @@ POST /https://flask-api-omnilense.herokuapp.com/api/facial_recognition HTTP/1.1
 Content-Type: application/json
 
 {
-    "path": "path_to_firebase_storage_image",
-    "user_id": "user_id of the current user
+    "user_id": "user_id of the current user",
+    "device_sent_from": "web/app/test",
+    "image": "image encoded in base64",
+    "num_of_faces": "num_of_faces"
 }
     </pre>
 
@@ -31,21 +33,10 @@ Content-Type: application/json
     "predicted_person": "["Ben DeSollar"]",
     "recents": ["Shows Recents"]
 }
-            </pre
-            >
+            </pre>
         </div>
 
         <h4>Example Call</h4>
-        <div id="example-response" class="json-view">
-            <!-- Example response will be populated by AJAX call -->
-        </div>
-
-        <label for="path-input">Path:</label>
-        <input
-                type="text"
-                id="path-input"
-                value="images/ml_images/LfqBYBcq1BhHUvmE7803PhCFxeI2.jpg"
-        />
 
         <label for="user-id-input">User ID:</label>
         <input
@@ -53,6 +44,33 @@ Content-Type: application/json
                 id="user-id-input"
                 value="LfqBYBcq1BhHUvmE7803PhCFxeI2"
         />
+
+        <label for="device-sent-from-input">Device Sent From:</label>
+        <select id="device-sent-from-input">
+            <option value="web">web</option>
+            <option value="app">app</option>
+            <option value="test">test</option>
+        </select>
+
+        <label for="image-input">Image:</label>
+        <input
+                type="file"
+                id="image-input"
+                accept="image/*"
+        />
+        <img id="image-preview" src="" alt="Image Preview" class="image-wrapper"
+             style="max-width: 400px; display: none;"/>
+
+        <label for="num-of-faces-input">Number of Faces:</label>
+        <input
+                type="text"
+                id="num-of-faces-input"
+                value="1"
+        />
+
+        <div id="example-response" class="json-view">
+            <!-- Example response will be populated by AJAX call -->
+        </div>
 
         <button id="example-button" class="btn btn-primary my-3">
             Make Example Call
@@ -69,19 +87,75 @@ Content-Type: application/json
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.js"></script>
 
 <script>
+    function readFileAndResizeImage(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const targetWidth = 400;
+                    const scaleFactor = targetWidth / img.width;
+                    canvas.width = targetWidth;
+                    canvas.height = img.height * scaleFactor;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    const resizedImage = canvas.toDataURL();
+                    resolve(resizedImage);
+                };
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function displayImagePreview(imageFile) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            const imgPreview = document.getElementById("image-preview");
+            imgPreview.src = event.target.result;
+            imgPreview.style.display = "block";
+        };
+        reader.readAsDataURL(imageFile);
+    }
+
     (function (jq) {
-        jq("#example-button").click(function () {
-            var path = jq("#path-input").val();
+        jq("#image-input").change(function () {
+            const imageFile = jq(this).prop("files")[0];
+            if (imageFile) {
+                displayImagePreview(imageFile);
+            }
+        });
+
+        jq("#example-button").click(async function () {
             var user_id = jq("#user-id-input").val();
+            var device_sent_from = jq("#device-sent-from-input").val();
+            var imageFile = jq("#image-input").prop('files')[0];
+            var num_of_faces = jq("#num-of-faces-input").val();
+
+            if (!imageFile) {
+                alert('Please upload an image file');
+                return;
+            }
+
+            try {
+                var resizedImage = await readFileAndResizeImage(imageFile);
+            } catch (error) {
+                console.error('Error while reading and resizing image', error);
+                return;
+            }
 
             jq.ajax({
-                url: "https://flask-api-omnilense.herokuapp.com/api/facial_recognition",
+                //url: "https://flask-api-omnilense.herokuapp.com/api/facial_recognition",
+                url: "http://192.168.0.116:8000/api/facial_recognition",
                 type: "POST",
                 data: JSON.stringify({
                     user_id: user_id,
-                    device_sent_from: "test",
-                    image: "test",
-                    num_of_faces: "1",
+                    device_sent_from: device_sent_from,
+
+                    image: resizedImage.replace(/^data:image\/\w+;base64,/, ''),
+                    num_of_faces: num_of_faces,
                 }),
                 dataType: "json",
                 contentType: "application/json",
