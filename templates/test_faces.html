@@ -20,7 +20,7 @@ block content %}
                 <button
                         id="yes-btn-{{ image_path }}"
                         class="feedback-btn"
-                        onclick="updateModel('{{ image_path }}', 'yes', '{{ prediction }}')"
+                        onclick="updateModel('{{ image_path }}', 'Yes', '{{ prediction }}')"
                 >
                     Yes
                 </button>
@@ -43,7 +43,7 @@ block content %}
                 <button
                         id="enter-btn-{{ image_path }}"
                         class="feedback-btn"
-                        onclick="updateModel('{{ image_path }}', 'no', '{{ prediction }}')"
+                        onclick="updateModel('{{ image_path }}', 'No', '{{ prediction }}')"
                 >
                     Enter
                 </button>
@@ -68,7 +68,7 @@ block content %}
 
     function handleKeyPress(event, image_path, prediction) {
         if (event.key === "Enter") {
-            updateModel(image_path, "no", prediction);
+            updateModel(image_path, "No", prediction);
         }
     }
 
@@ -83,7 +83,7 @@ block content %}
         // Show input entered message
         inputEnteredText.style.display = "block";
         console.log("Updating model with image_path:", image_path);
-        fetch("/api/facial_recognition/feedback", {
+        fetch("http://192.168.0.116:8000/api/facial_recognition/feedback", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

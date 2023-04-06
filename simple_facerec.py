@@ -44,7 +44,7 @@ class RecognitionHelper:
                 face_locations = face_recognition.face_locations(rgb_img, number_of_times_to_upsample=1,
                                                                  model="cnn")
                 # Get encoding
-                img_encoding_list = face_recognition.face_encodings(rgb_img, face_locations, num_jitters=70)
+                img_encoding_list = face_recognition.face_encodings(rgb_img, face_locations, num_jitters=80)
 
                 if len(img_encoding_list) > 0:
                     img_encoding = img_encoding_list[0]
@@ -60,7 +60,7 @@ class RecognitionHelper:
         np.save("encodings/{}.npy".format('trainedNames'), self.names)
         print("Encoding images loaded")
 
-    def load_single_img(self, path):
+    def load_single_img(self, path, num_of_jitters=25):
         # Loading images from folder
         img = cv2.imread(path)
         img_resize = cv2.resize(img, (0, 0), fx=self.resizedFrame, fy=self.resizedFrame)
@@ -73,15 +73,14 @@ class RecognitionHelper:
         # Get location of face
         face_locations = face_recognition.face_locations(rgb_img)
         # Get encoding
-        img_encoding_list = face_recognition.face_encodings(rgb_img, face_locations, num_jitters=25)
+        img_encoding_list = face_recognition.face_encodings(rgb_img, face_locations, num_jitters=num_of_jitters)
 
         if len(img_encoding_list) > 0:
-            return True
+            return img_encoding_list[0]
         else:
             print(f"No face found in {path} even after enhancement.")
-
-        print("Encoding images loaded")
-        return False
+            print("Encoding images loaded")
+            return None
 
     def detect_known_faces(self, frame, num_of_faces=1):
         print("Detecting faces")
@@ -154,26 +153,41 @@ class RecognitionHelper:
             return None
 
     def update_model(self, feedback_data):
+        print("Updating model with feedback: {}".format(feedback_data))
         img_path = feedback_data["image_path"]
         print("Updating model with image: {}".format(img_path))
-        if self.load_single_img(img_path):
+        encodings = self.load_single_img(img_path, 100)
+        if encodings is not None:
             # load the names from file
             self.names = np.load("encodings/trainedNames.npy", allow_pickle=True)
             # load encodings from file
             self.encodings = np.load("encodings/trainedEncodings.npy", allow_pickle=True)
+
             index = -1
             if feedback_data["answer"] == "Yes":
                 correct_name = feedback_data["prediction"]
-                index = self.names.index(correct_name)
+                index = np.where(self.names == correct_name)[0][0] if correct_name in self.names else -1
+                print("Index of correct name: {}".format(index))
             elif feedback_data["answer"] == "No":
-                correct_name = feedback_data["correct_name"]
+                correct_name = feedback_data["identity"]
+                correct_name = correct_name.replace(" ", "_")
                 if correct_name not in self.names:
-                    self.names.append(correct_name)
-                index = self.names.index(correct_name)
+                    # append the new name to ndarray
+                    self.names = np.append(self.names, correct_name)
+
+                    # convert the single encoding to a 2D array with one row
+                    encodings = encodings[np.newaxis, :]
+
+                    # append the new encoding to ndarray
+                    self.encodings = np.append(self.encodings, encodings, axis=0)
+                    print("New name added to model")
+                    # Save the updated encodings and names to files
+                index = np.where(self.names == correct_name)[0][0] if correct_name in self.names else -1
 
             # Update the encodings and names
             if index >= 0:
                 print("Updating model")
+                # Replace the old encoding with the new one
                 self.encodings[index] = self.encodings[-1]
                 self.names[index] = correct_name
 

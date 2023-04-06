@@ -27,6 +27,8 @@ def rename_and_move_images():
             # Move the image to the new directory with the new name
             shutil.move(image_file, os.path.join(file_name, new_file_name))
 
+            print(f"Moved {image_file} to {os.path.join(file_name, new_file_name)}")
+
 
 if __name__ == "__main__":
     rename_and_move_images()
