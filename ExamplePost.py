@@ -1,5 +1,7 @@
 import base64
 import json
+
+import cv2
 import requests
 import time
 
@@ -11,6 +13,9 @@ class FacialRecognitionAPI:
     def recognize_face(self, path, user_id, device_sent_from="web"):
         url = f"{self.base_url}/api/facial_recognition"
         with open(path, "rb") as image_file:
+            # Make image bigger
+            # image = cv2.imread(path)
+            # cv2.imwrite(path, image)
             encoded_image = base64.b64encode(image_file.read()).decode("utf-8")
         data = {"image": encoded_image, "user_id": user_id, "num_of_faces": 1, "device_sent_from": device_sent_from}
         try:
@@ -42,9 +47,9 @@ class FacialRecognitionAPI:
 
 # http://192.168.0.233:8000
 # https://flask-api-omnilense.herokuapp.com
-api = FacialRecognitionAPI("https://flask-api-omnilense.herokuapp.com")
+api = FacialRecognitionAPI("http://172.17.85.191:8000")
 user_id = "LfqBYBcq1BhHUvmE7803PhCFxeI2"
-path = "imagesTest/kelly.jpeg"
+path = "imagesTest/AD.jpg"
 
 start = time.time()
 result = api.recognize_face(path, user_id, "web")

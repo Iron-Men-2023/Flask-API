@@ -49,7 +49,7 @@ def facial_recognition():
     else:
         print("base64 image: ", image_base64[:100])
         image = base64_to_image(image_base64)
-        image_path = save_image(image, user_id)
+        image_path = save_image(image, user_id, device_sent_from)
     print("Time taken to get image: ", time.time() - start_time)
     start1 = time.time()
     face_data, recents = recognizer.process_image(image_path, user_id, num_of_faces)
@@ -87,12 +87,16 @@ def base64_to_image(base64_str):
     return img
 
 
-def save_image(image, user_id):
+def save_image(image, user_id, device_sent_from):
     # if device_sent_from == "app":
     # image = image.rotate(180, expand=True)
     filename = f'imagesTest/{user_id}.jpg'
-    image = image.convert('RGB')  # Convert the image to RGB mode
-    image.save(filename, 'JPEG')
+    if device_sent_from == "app":
+        # image = image.rotate(180, expand=True)
+        image = image.convert('RGB')  # Convert the image to RGB mode
+    # make image bigger
+    image = cv2.resize(np.array(image), (0, 0), fx=3, fy=3)
+    cv2.imwrite(filename, image)
     return filename
 
 
