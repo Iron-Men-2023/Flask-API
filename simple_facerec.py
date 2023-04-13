@@ -82,6 +82,27 @@ class RecognitionHelper:
             print("Encoding images loaded")
             return None
 
+    def load_encodings(self):
+        self.encodings = np.load("encodings/{}.npy".format('trainedEncodings'))
+        self.names = np.load("encodings/{}.npy".format('trainedNames'))
+        print("Encoding images loaded")
+
+    def train_one_image_add_to_encodings(self, path, name):
+        self.load_encodings()
+        img_encoding = self.load_single_img(path)
+        if img_encoding is not None:
+            # convert the single encoding to a 2D array with one row
+            img_encoding = img_encoding[np.newaxis, :]
+            self.encodings = np.append(self.encodings, img_encoding, axis=0)
+            self.names = np.append(self.names, name)
+            np.save("encodings/{}.npy".format('trainedEncodings'), self.encodings)
+            # save the names to a file
+            np.save("encodings/{}.npy".format('trainedNames'), self.names)
+            print("Encoding images loaded")
+            return True
+        else:
+            return False
+
     def detect_known_faces(self, frame, num_of_faces=1):
         print("Detecting faces")
         if frame is None:

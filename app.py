@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 from flask import Flask, request, jsonify, render_template
 from downloadImgAndRec import FirebaseImageRecognizer
+from download_images_from_firebase import FirebaseImageDownloader
 from simple_facerec import RecognitionHelper
 from flask_cors import CORS
 import base64
@@ -92,7 +93,7 @@ def save_image(image, user_id, device_sent_from):
     # image = image.rotate(180, expand=True)
     filename = f'imagesTest/{user_id}.jpg'
     if device_sent_from == "app":
-        # image = image.rotate(180, expand=True)
+        print("Changing image color")
         image = image.convert('RGB')  # Convert the image to RGB mode
     # make image bigger
     image = cv2.resize(np.array(image), (0, 0), fx=3, fy=3)
@@ -105,6 +106,20 @@ def handle_options():
     response = app.make_default_options_response()
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     return response
+
+
+def train():
+    recognizerHelper.train_on_images("static/images")
+
+
+@app.route('/api/train_data', methods=['POST'])
+def train_data():
+    firebase_json_key = 'omnilens-d5745-firebase-adminsdk-rorof-df461ea39d.json'
+    firebase_bucket_name = 'omnilens-d5745.appspot.com'
+    downloader = FirebaseImageDownloader(firebase_json_key, firebase_bucket_name)
+    downloader.download_blobs_in_folder('images/Avatar')
+    train()
+    return jsonify({'message': 'Training done'})
 
 
 @app.route('/test_faces')
@@ -170,6 +185,7 @@ def check():
         device_sent_from = form['device_sent_from']
         print("Device sent from: ", device_sent_from)
         image_base64 = form['image']
+        name = form['name']
     except:
         try:
             start_time1 = time.time()
@@ -178,12 +194,14 @@ def check():
             image_base64 = jsonData['image']
             device_sent_from = jsonData['device_sent_from']
             user_id = jsonData['user_id']
+            name = jsonData['name']
             print("Time taken to decode: ", time.time() - start_time1)
 
         except:
             raise Exception("Error getting data from request")
+    print("Device Sent from: ", device_sent_from)
     image = base64_to_image(image_base64)
-    image_path = save_image(image, user_id)
+    image_path = save_image(image, user_id, device_sent_from)
     print("Image path: ", image_path)
     # Check if there is a face in the image
     check_face = recognizerHelper.load_single_img(image_path)
@@ -193,6 +211,7 @@ def check():
         return jsonify({'message': 'No face found'})
     else:
         print("Face found")
+        recognizerHelper.train_one_image_add_to_encodings(image_path, name)
         return jsonify({'message': 'Face found'})
 
 
