@@ -115,13 +115,12 @@ class RecognitionHelper:
         if num_of_faces == 1:
             face_locations = face_recognition.face_locations(rgb_small_frame)
             face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
-        elif num_of_faces == 2:
-            face_locations = face_recognition.face_locations(rgb_small_frame, number_of_times_to_upsample=2,
-                                                             model="cnn")
-            face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations, num_jitters=50)
         else:
-            face_locations = face_recognition.face_locations(rgb_small_frame, number_of_times_to_upsample=3)
-            face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations, num_jitters=60)
+            face_locations = face_recognition.face_locations(rgb_small_frame, number_of_times_to_upsample=2)
+            face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations, num_jitters=30)
+        # else:
+        #     face_locations = face_recognition.face_locations(rgb_small_frame, number_of_times_to_upsample=3)
+        #     face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations, num_jitters=60)
 
         if len(face_encodings) > 0:
             return self.process_encodings(face_locations, face_encodings)
