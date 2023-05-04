@@ -8,7 +8,7 @@ def train():
 
 
 if __name__ == "__main__":
-    firebase_json_key = 'omnilens-d5745-firebase-adminsdk-rorof-df461ea39d.json'
+    firebase_json_key = 'omnilens-d5745-firebase-adminsdk-rorof-6a932e9332.json'
     firebase_bucket_name = 'omnilens-d5745.appspot.com'
     downloader = FirebaseImageDownloader(firebase_json_key, firebase_bucket_name)
     downloader.download_blobs_in_folder('images/Avatar')

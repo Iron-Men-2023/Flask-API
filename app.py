@@ -17,7 +17,7 @@ import ujson
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
-recognizer = FirebaseImageRecognizer("omnilens-d5745-firebase-adminsdk-rorof-df461ea39d.json",
+recognizer = FirebaseImageRecognizer("omnilens-d5745-firebase-adminsdk-rorof-6a932e9332.json",
                                      "omnilens-d5745.appspot.com")
 recognizerHelper = RecognitionHelper()
 

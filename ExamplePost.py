@@ -86,7 +86,7 @@ class FacialRecognitionAPI:
 
 # http://192.168.0.233:8000
 # https://flask-api-omnilense.herokuapp.com
-api = FacialRecognitionAPI("http://192.168.0.120:8000")
+api = FacialRecognitionAPI("http://192.168.0.119:8000")
 user_id = "LfqBYBcq1BhHUvmE7803PhCFxeI2"
 path = "imagesTest/Kelly.jpeg"
 
