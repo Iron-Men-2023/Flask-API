@@ -42,4 +42,4 @@ We value your privacy and adhere to strict privacy protocols. Please review our 
 
 ---
 
-For more information or support, please contact us at support@your-api-domain.com.
+For more information or support, please create an issue.
