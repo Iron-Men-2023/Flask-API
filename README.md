@@ -11,7 +11,7 @@
 - [Privacy Policy](#privacy-policy)
 
 ## Introduction
-The Facial Recognition API is a robust and intelligent solution designed to recognize and authenticate users based on their facial features. Built using Flask and hosted on Heroku, this API leverages cutting-edge facial recognition algorithms to accurately identify individuals from a given database.
+The Facial Recognition API is a robust and intelligent solution designed to recognize and authenticate users based on their facial features. Built using Flask and hosted on Heroku, this API leverages cutting-edge facial recognition algorithms to accurately identify individuals from a given database. Give it a try [here](https://flask-api-omnilense.herokuapp.com/)
 
 ## Core Features
 1. **User Identification**: Identify the user from a pre-existing database, returning the user's details along with a confidence score.
