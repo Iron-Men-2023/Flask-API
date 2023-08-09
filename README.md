@@ -38,7 +38,7 @@ For detailed integration guidelines, API documentation, pricing, and support, pl
 This project is licensed under the MIT License. See the [LICENSE.md](LICENSE.md) file for details.
 
 ## Privacy Policy
-We value your privacy and adhere to strict privacy protocols. Please review our [Privacy Policy](https://your-api-domain.com/privacy) to understand how we collect, use, and protect your information.
+We value your privacy and adhere to strict privacy protocols. Please review our [Privacy Policy](PRIVACY_POLICY.md) to understand how we collect, use, and protect your information.
 
 ---
 
